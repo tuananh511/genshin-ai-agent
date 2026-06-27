@@ -1,0 +1,13 @@
+# Secrets
+.env
+
+# Virtual env / cache
+.venv
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Dữ liệu sinh ra lúc chạy — không phải source code
+genshin_agent.db
+report.html
+report.md
