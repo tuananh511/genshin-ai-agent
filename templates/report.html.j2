@@ -5,18 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Genshin AI Report — {{ nickname }}</title>
 <style>
-  body { font-family: 'Segoe UI', sans-serif; max-width: 1100px; margin: 40px auto; padding: 0 20px; background: #0f0f1a; color: #e0e0e0; }
+  body { font-family: 'Segoe UI', sans-serif; max-width: 1500px; margin: 40px auto; padding: 0 24px; background: #0f0f1a; color: #e0e0e0; }
   h1 { color: #c8a96e; border-bottom: 2px solid #c8a96e; padding-bottom: 8px; }
   h2 { color: #7eb8d4; margin-top: 40px; }
   .meta { color: #888; margin-bottom: 30px; }
-  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9em; }
-  th { background: #1e1e3a; color: #c8a96e; padding: 8px; text-align: left; }
-  td { padding: 6px 8px; border-bottom: 1px solid #2a2a4a; }
-  tr:hover { background: #1a1a2e; }
-  .card { background: #1a1a2e; border-radius: 8px; padding: 20px; margin: 16px 0; border-left: 4px solid #7eb8d4; }
-  .todo { background: #1e1e3a; border-radius: 6px; padding: 12px 16px; margin: 8px 0; }
+  .panel { background: #1a1a2e; border-radius: 10px; padding: 16px; margin: 16px 0; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.92em; }
+  th { background: #23234a; color: #c8a96e; padding: 10px; text-align: left; white-space: nowrap; }
+  td { padding: 8px 10px; border-bottom: 1px solid #2a2a4a; }
+  tr:hover td { background: #23233f; }
+  tr td:first-child { border-left: 4px solid var(--row-color, #7eb8d4); }
+  a { color: #7eb8d4; }
+  .element-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+  .card { background: #1a1a2e; border-radius: 10px; padding: 20px; margin: 16px 0; border-left: 4px solid #7eb8d4; }
+  .todo { background: #1e1e3a; border-radius: 8px; padding: 12px 16px; margin: 8px 0; }
   .todo .reason { color: #888; font-size: 0.9em; }
-  footer { color: #444; text-align: center; margin-top: 60px; font-size: 0.85em; }
+  details.char-accordion { background: #1a1a2e; border-radius: 10px; margin: 10px 0; padding: 10px 16px; border-left: 4px solid var(--acc-color, #7eb8d4); }
+  details.char-accordion summary { cursor: pointer; color: #c8a96e; font-weight: bold; padding: 6px 0; font-size: 1.05em; }
+  details.char-accordion .accordion-body { margin-top: 10px; line-height: 1.7; }
+  details.char-accordion .accordion-body p { margin: 6px 0; }
+  .guide-note { color: #888; font-size: 0.85em; font-style: italic; margin-bottom: 10px; }
+  .item-tip { position: relative; border-bottom: 1px dotted #7eb8d4; cursor: help; white-space: nowrap; }
+  .item-tip img.tip-img {
+    display: none; position: absolute; bottom: 130%; left: 0;
+    width: 55px; height: 55px; z-index: 50;
+    background: #0f0f1a; border: 1px solid #c8a96e; border-radius: 6px; padding: 2px;
+  }
+  .item-tip:hover img.tip-img { display: block; }
 </style>
 </head>
 <body>
@@ -29,18 +44,25 @@
 </div>
 
 <h2>📊 Character Score <span style="font-size:0.6em;color:#888;">(xếp theo thứ tự nên build trước)</span></h2>
+<div class="panel">
 <table>
   <tr>
-    <th>Nhân vật</th><th>Lv</th><th>C</th>
+    <th>Nhân vật</th><th>Lv</th><th>Cung mệnh</th><th>Vũ khí</th><th>Set</th>
     {% for col in stat_columns %}<th>{{ col }}</th>{% endfor %}
-    <th>DMG Bonus</th>
-    <th>Vấn đề</th>
+    <th>DMG Bonus</th><th>Vấn đề</th>
   </tr>
   {% for s in scores %}
   <tr>
-    <td>{{ s.name }} ({{ s.element }})</td>
+    <tr style="--row-color: {{ s.element_color }};">
+    <td><span class="element-dot" style="background:{{ s.element_color }};"></span>{{ s.name }} ({{ s.element_vi }})</td>
     <td>{{ s.level }}</td>
     <td>C{{ s.constellation_count }}</td>
+    <td>
+      <span class="item-tip">{{ s.weapon_name }}{% if s.weapon_icon_url %}<img class="tip-img" src="{{ s.weapon_icon_url }}" loading="lazy">{% endif %}</span>
+    </td>
+    <td>
+      {% for set in s.sets %}<span class="item-tip">{{ set.name }} ({{ set.count }}){% if set.icon_url %}<img class="tip-img" src="{{ set.icon_url }}" loading="lazy">{% endif %}</span>{% if not loop.last %}, {% endif %}{% endfor %}
+    </td>
     {% for v in s.stat_values %}<td>{{ v }}</td>{% endfor %}
     <td>{{ s.dmg_bonus }}</td>
     <td>
@@ -51,16 +73,10 @@
   </tr>
   {% endfor %}
 </table>
-<p style="color:#666; font-size:0.85em;">Bảng chỉ hiển thị stat thô để đối chiếu — phần phân tích cụ thể với guide nằm ở "Phân tích từ AI" dưới đây.</p>
+</div>
 
 <h2>🔍 Phân tích từ AI</h2>
 <div class="card">{{ llm_advice_html | safe }}</div>
-{% if guide_sources %}
-<p style="color:#888; font-size:0.85em;">
-  Nguồn tham khảo:
-  {% for g in guide_sources %}<a href="{{ g.url }}" style="color:#7eb8d4;">{{ g.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
-</p>
-{% endif %}
 
 <h2>🎯 Domain nên farm hôm nay — {{ day_of_week }}</h2>
 {% for todo in required_todos %}
@@ -73,11 +89,36 @@
 <h2>📝 Nhắc nhở thêm <span style="font-size:0.6em;color:#888;">(tuỳ chọn — không liên quan farm)</span></h2>
 {% for todo in optional_todos %}
 <div class="todo" style="opacity:0.8;">
-  <strong>{{ todo.label }}</strong><br>
+  <strong>{{ todo.label }}</strong>{% if todo.url %} — <a href="{{ todo.url }}" target="_blank" rel="noopener">Mở link ↗</a>{% endif %}<br>
   <span class="reason">💡 {{ todo.reason }}</span>
 </div>
 {% endfor %}
 
-<footer>Generated by Genshin AI Agent</footer>
+<h2>📖 Chi tiết Build Guide</h2>
+{% for acc in guide_accordions %}
+<details class="char-accordion" style="border-left-color: {{ acc.element_color }};">
+  <summary><span class="element-dot" style="background:{{ acc.element_color }};"></span>{{ acc.name }} ({{ acc.element_vi }})</summary>
+  <div class="accordion-body">
+    {% if acc.url %}
+    <p class="guide-note">Đây là bản tóm tắt. Xem chi tiết đầy đủ tại:
+      <a href="{{ acc.url }}" target="_blank" rel="noopener">trang build {{ acc.name }} ↗</a>
+    </p>
+    {% endif %}
+    <p><strong>Vũ khí nên dùng (cao → thấp):</strong>
+      {% for w in acc.weapons %}<span class="item-tip">{{ w.name }}{% if w.icon_url %}<img class="tip-img" src="{{ w.icon_url }}" loading="lazy">{% endif %}</span>{% if not loop.last %}, {% endif %}{% endfor %}
+    </p>
+    <p><strong>Bộ Thánh Di Vật nên dùng:</strong>
+      {% for set in acc.artifact_sets %}<span class="item-tip">{{ set.label }}{% if set.icon_url %}<img class="tip-img" src="{{ set.icon_url }}" loading="lazy">{% endif %}</span>{% if not loop.last %}, {% endif %}{% endfor %}
+    </p>
+    <p><strong>Thuộc tính ưu tiên của TDV:</strong>
+      {% for slot, stat in acc.main_stats.items() %}{{ slot }}: {{ stat }}{% if not loop.last %} | {% endif %}{% endfor %}
+    </p>
+    <p><strong>Ưu tiên chỉ số phụ:</strong> {{ acc.substats | join(" > ") }}</p>
+    <p><strong>Ưu tiên kỹ năng:</strong> {{ acc.talents | join(" > ") }}</p>
+  </div>
+</details>
+{% endfor %}
+
+<footer style="color:#444; text-align:center; margin-top:60px; font-size:0.85em;">Generated by Genshin AI Agent</footer>
 </body>
 </html>

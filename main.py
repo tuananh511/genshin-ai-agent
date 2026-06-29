@@ -23,8 +23,10 @@ def main():
     init_db()
     save_snapshot(snapshot)
 
+    update_guides = input("Cập nhật guide build mới nhất từ genshin-builds? (Y/N): ").strip().lower() == "y"
+
     print("[3/5] Optimizer đang phân tích (gọi AI, có thể mất 10-30s)...")
-    analysis = analyze_account(snapshot.characters)
+    analysis = analyze_account(snapshot.characters, update_guides=update_guides)
 
     print("[4/5] Lập kế hoạch hôm nay")
     plan = make_resin_plan(analysis)

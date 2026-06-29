@@ -10,7 +10,8 @@ SERVER_RESET_HOUR = 4  # 4:00 AM UTC+8
 class TodoItem:
     label: str
     reason: str
-    category: str  # "talent" | "artifact" | "weekly_boss" | "info" | "event" | "checkin" | "teapot" | "transformer"
+    category: str
+    url: str | None = None
 
 
 @dataclass
@@ -92,13 +93,15 @@ def make_resin_plan(analysis: AccountAnalysis) -> DailyPlan:
         ),
         TodoItem(
             label="Daily Check-in trên HoYoLAB",
-            reason="Primogem/Mora miễn phí mỗi ngày — https://www.hoyolab.com/",
+            reason="Primogem/Mora miễn phí mỗi ngày",
             category="checkin",
+            url="https://www.hoyolab.com/",
         ),
         TodoItem(
             label="Xem event đang chạy",
-            reason="Có thể có Primogem/vật phẩm free từ event giới hạn thời gian — https://www.hoyolab.com/genshin/",
+            reason="Có thể có Primogem/vật phẩm free từ event giới hạn thời gian",
             category="event",
+            url="https://www.hoyolab.com/genshin/",
         ),
     ]
 

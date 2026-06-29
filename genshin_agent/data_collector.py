@@ -37,6 +37,7 @@ class Weapon:
     rarity: int
     base_stats: list[StatValue]
     name_hash: str
+    icon: str
 
 @dataclass
 class Artifact:
@@ -49,6 +50,7 @@ class Artifact:
     sub_stats: list[StatValue]
     name_hash: str
     set_name_hash: str
+    icon: str
 
 @dataclass
 class Character:
@@ -83,6 +85,7 @@ def _parse_weapon(equip: dict) -> Weapon:
         rarity=flat["rankLevel"],
         base_stats=[_parse_stat(s) for s in flat.get("weaponStats", [])],
         name_hash=flat["nameTextMapHash"],
+        icon=flat.get("icon", ""),
     )
 
 def _parse_artifact(equip: dict) -> Artifact:
@@ -98,6 +101,7 @@ def _parse_artifact(equip: dict) -> Artifact:
         sub_stats=[_parse_stat(s) for s in flat.get("reliquarySubstats", [])],
         name_hash=flat["nameTextMapHash"],
         set_name_hash=flat["setNameTextMapHash"],
+        icon=flat.get("icon", ""),
     )
 
 def _parse_character(raw: dict) -> Character:

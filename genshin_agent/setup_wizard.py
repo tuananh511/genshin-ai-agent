@@ -23,21 +23,21 @@ def ensure_config() -> None:
     """Chạy 1 lần đầu nếu .env chưa đủ thông tin — hỏi người dùng nhập API key + UID."""
     env = _read_env()
 
-    if not env.get("OPENROUTER_API_KEY"):
+    if not env.get("LLM_API_KEY"):
         print("=" * 60)
-        print("THIẾT LẬP LẦN ĐẦU — cần OpenRouter API key (miễn phí)")
+        print("THIẾT LẬP LẦN ĐẦU — cần Google AI Studio API key (miễn phí)")
         print("=" * 60)
-        print("1. Vào https://openrouter.ai/ , đăng ký miễn phí (Google/email)")
-        print("2. Vào https://openrouter.ai/settings/keys , bấm 'Create Key'")
-        print("3. Copy key (dạng sk-or-v1-...) và dán vào đây")
+        print("1. Vào https://aistudio.google.com/ , đăng nhập bằng Google account")
+        print("2. Vào https://aistudio.google.com/apikey , bấm 'Create API key'")
+        print("3. Copy key (dạng AIza...) và dán vào đây")
         print()
         print("Lưu ý: mỗi người PHẢI tự tạo key riêng — không thể dùng chung 1 key")
         print("qua source code public, vì ai cũng lấy được và sẽ làm hết quota free.")
         print()
         key = ""
         while not key.strip():
-            key = input("Dán OpenRouter API key của bạn: ").strip()
-        env["OPENROUTER_API_KEY"] = key
+            key = input("Dán Google AI Studio API key của bạn: ").strip()
+        env["LLM_API_KEY"] = key
 
     if not env.get("GENSHIN_UID"):
         print()

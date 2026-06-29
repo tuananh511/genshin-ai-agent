@@ -1,33 +1,36 @@
 # Genshin AI Account Manager
 
-AI Agent tự động phân tích account Genshin Impact của bạn và đề xuất việc nên làm hôm nay — không phải chatbot hỏi-đáp, mà là 1 pipeline tự động chạy bằng `python main.py`.
+AI Agent tự động phân tích account Genshin Impact và đề xuất việc nên làm hôm nay — chạy bằng `python main.py`, không phải chatbot hỏi-đáp.
 
 ## Pipeline
 Data Collector (Enka API)
 
-→ Knowledge Collector (Enka static data + guide thật từ KeqingMains)
+→ AssetManager (tra tên nhân vật/vũ khí/set: Enka loc.json → TextMap tiếng Việt/Anh)
 
-→ Optimizer (code tính stat + AI đối chiếu guide)
+→ Guide Collector (build guide thật từ genshin-builds.github.io, cache, cập nhật theo yêu cầu)
+
+→ Optimizer (code tính stat + Gemini Flash đối chiếu guide, phát hiện cầm sai vũ khí/set)
 
 → Planner (checklist farm gì hôm nay)
 
-→ Report Generator (report.html + report.md)
-
-Nguyên tắc: việc nào tính được bằng công thức (lịch server, ngày trong tuần, parse dữ liệu) thì dùng code thuần. AI chỉ dùng cho phần cần đọc hiểu/diễn giải (đối chiếu build với guide, viết nhận xét).
+→ Report Generator (report.html với Accordion + ảnh hover, report.md cho Github)
+Nguyên tắc: việc tính được bằng công thức (lịch server, parse dữ liệu, tra tên) dùng code thuần. AI chỉ dùng để đọc hiểu/diễn giải (đối chiếu build với guide, viết nhận xét).
 
 ## Tính năng
 
 - Lấy character/weapon/artifact/talent/constellation/level thật từ Enka Network (qua UID)
-- Crawl guide build thật từ KeqingMains cho từng nhân vật trong account (tự dò URL, cache 7 ngày)
-- Phân tích: nhân vật nào cần nâng talent, artifact nào chưa +20, đối chiếu stat hiện tại với guide
-- Checklist farm hôm nay (Required) + nhắc nhở phụ (Optional: HoYoLAB check-in, event, transformer, teapot)
-- Xuất `report.html` (dark theme) và `report.md` (đọc trên Github)
+- Tra tên nhân vật/vũ khí/Thánh Di Vật sang tiếng Việt qua `AssetManager` (Enka data + TextMap chính thức từ game)
+- Crawl build guide thật từ genshin-builds.github.io cho từng nhân vật trong account — vũ khí/set/chỉ số/kỹ năng xếp theo độ ưu tiên
+- Phát hiện khi đang dùng vũ khí/set KHÁC với đề xuất guide, gợi ý nên farm gì thay thế
+- Report dạng Accordion (1 nhân vật/mục), kèm ảnh hover khi rê chuột vào tên vũ khí/Thánh Di Vật, có link tới guide gốc
+- Checklist farm hôm nay (Required) + nhắc nhở phụ (Optional: HoYoLAB check-in, event, transformer, teapot — đều có link mở tab mới)
+- Xuất `report.html` (dark theme, màu theo hệ nguyên tố) và `report.md` (đọc trên Github)
 
 ## Yêu cầu
 
-- Python 3.12+, [uv](https://docs.astral.sh/uv/) để quản lý dependency
-- 1 OpenRouter API key — **miễn phí**, đăng ký tại [openrouter.ai](https://openrouter.ai/), lấy key tại [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys)
-- UID Genshin Impact của bạn (xem trong Pause Menu trong game) + **đã bật "Tủ trưng bày nhân vật"** cho các nhân vật muốn phân tích
+- Python 3.12+, [uv](https://docs.astral.sh/uv/)
+- 1 Google AI Studio API key — **miễn phí**, lấy tại [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (free tier: 1500 request/ngày cho model Flash, không cần thẻ tín dụng)
+- UID Genshin Impact của bạn (xem trong Pause Menu) + đã bật **"Tủ trưng bày nhân vật"**
 
 ## Cài đặt & chạy
 
@@ -37,56 +40,56 @@ cd genshin-ai-agent
 uv run main.py
 ```
 
-Lần đầu chạy, hệ thống sẽ hỏi bạn dán OpenRouter API key và UID (hoặc bấm N để dùng UID demo xem thử). Từ lần 2 sẽ không hỏi lại — thông tin lưu trong `.env` (không commit lên Github).
+Lần đầu chạy sẽ hỏi API key + UID (hoặc N để dùng UID demo). Mỗi lần chạy sẽ hỏi **"Cập nhật guide build mới nhất?"** — chọn N để dùng cache cũ (nhanh, không gọi mạng), chọn Y khi muốn crawl lại (ví dụ sau khi game ra bản cập nhật mới).
 
 ## Giới hạn cần biết
 
-- **OpenRouter free tier**: 50 request/ngày nếu tài khoản chưa nạp gì, 1000/ngày nếu nạp $10 (1 lần, vẫn dùng model free — đây không phải mua model, chỉ là "tiền cược chống spam"). Project mặc định dùng `openrouter/free` (tự chọn model free khả dụng), có retry tự động khi model bị lặp/lỗi/rate-limit.
-- **Guide từ KeqingMains**: chỉ crawl được nếu nhân vật có trang guide đầy đủ trên KeqingMails. Một vài nhân vật có thể không lấy được (hệ thống tự fallback, AI vẫn phân tích dựa trên kiến thức chung, chỉ là không có "nguồn tham khảo" kèm theo).
-- **Wish Advisor** (`genshin_agent/wish_advisor.py`): đã viết nhưng **chưa nối vào pipeline chính** — model free hiện tại tư vấn chiến lược dài hạn (nên roll gì) không đủ tốt. Giữ lại để dễ nối lại nếu sau này dùng model mạnh hơn.
+- **LLM**: dùng Gemini Flash qua endpoint tương thích OpenAI của Google AI Studio. Nếu model lỗi/quá tải liên tục, tool sẽ hỏi bạn nhập tên model khác (xem danh sách tại [ai.google.dev/gemini-api/docs/models](https://ai.google.dev/gemini-api/docs/models)) và tự lưu lại cho lần sau.
+- **Tra tên item**: dùng dữ liệu Enka + TextMap chính thức từ game (qua `AssetManager`). Một số ít vũ khí/set (khoảng 10 trong toàn bộ game, đã xác minh kỹ) có hash không khớp với bất kỳ nguồn TextMap nào tìm được — hiển thị `(chưa rõ tên #hash)`, không suy đoán. Đây là giới hạn dữ liệu cộng đồng đã biết, không phải lỗi.
+- **Guide build**: crawl từ genshin-builds.github.io — chỉ hoạt động với nhân vật có trang guide đầy đủ trên đó.
+- **Wish Advisor** (`genshin_agent/wish_advisor.py`): đã viết nhưng **chưa nối vào pipeline chính** — tư vấn chiến lược roll banner cần model mạnh hơn free tier hiện tại để đủ tin cậy. Giữ lại để dễ nối lại sau.
 
 ## Cấu trúc project
 genshin-ai-agent/
 
-├── main.py                       # Entry point — chạy toàn bộ pipeline
+├── main.py
 
-├── config.yaml                   # Cấu hình LLM (không bí mật)
+├── config.yaml
 
 ├── genshin_agent/
 
-│   ├── config.py                 # Đọc .env + config.yaml
+│   ├── config.py              # đọc .env + config.yaml
 
-│   ├── llm_client.py             # get_llm() + safe_llm_call() dùng chung
+│   ├── llm_client.py           # get_llm() + safe_llm_call() — tự retry, tự hỏi đổi model khi lỗi
 
-│   ├── setup_wizard.py           # Hỏi API key/UID lần đầu chạy
+│   ├── setup_wizard.py         # hỏi API key/UID lần đầu chạy
 
-│   ├── data_collector.py         # Fetch + parse Enka API
+│   ├── data_collector.py       # fetch + parse Enka API
 
-│   ├── database.py               # SQLite save/load
+│   ├── database.py             # SQLite save/load
 
-│   ├── knowledge_collector.py    # Enka static data (tên nhân vật/vũ khí) + cache
+│   ├── asset_manager.py        # tra tên nhân vật/vũ khí/set (Enka data + TextMap VI/EN)
 
-│   ├── guide_collector.py        # Crawl guide thật từ KeqingMains + cache
+│   ├── guide_collector.py      # crawl build guide từ genshin-builds.github.io + cache
 
-│   ├── optimizer.py              # Tính stat (code) + đối chiếu guide (AI)
+│   ├── optimizer.py            # tính stat (code) + đối chiếu guide, phát hiện sai build (AI)
 
-│   ├── planner.py                # Checklist farm hôm nay
+│   ├── planner.py               # checklist farm hôm nay
 
-│   ├── wish_advisor.py           # (chưa nối vào main.py — xem Giới hạn)
+│   ├── wish_advisor.py          # (chưa nối vào main.py — xem Giới hạn)
 
-│   └── report_generator.py       # Xuất report.html/report.md
+│   └── report_generator.py     # xuất report.html/report.md
 
-├── templates/                    # Jinja2 templates
+├── templates/
 
 └── tests/
-
 ## Roadmap
 
 - [ ] Multi-account
 - [ ] Discord/Telegram bot
 - [ ] Web Dashboard
-- [ ] Auto cập nhật theo patch mới
+- [ ] Gợi ý banner nên roll (cần nguồn dữ liệu banner thời gian thực, chưa nghiên cứu)
 
 ## Disclaimer
 
-Project cá nhân/học tập, không liên kết với HoYoverse. Chỉ đọc dữ liệu công khai (Enka Character Showcase mà người chơi tự bật, trang guide công khai trên KeqingMains).
+Project cá nhân/học tập, không liên kết HoYoverse. Chỉ đọc dữ liệu công khai (Enka Character Showcase người chơi tự bật, trang guide công khai genshin-builds.github.io).
