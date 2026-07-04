@@ -6,16 +6,41 @@ import markdown
 from genshin_agent.optimizer import AccountAnalysis
 from genshin_agent.planner import DailyPlan
 from genshin_agent.asset_manager import asset_manager
+from genshin_agent import background_collector
 
+def generate_reports(nickname, ar, analysis, plan,
+                     abyss_data=None, promo_codes=None) -> tuple[Path, Path]:
+    """Xuất report.html. Trả tuple (html_path, html_path) để main.py không cần sửa unpack."""
+    env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)))
+    context = _build_context(nickname, ar, analysis, plan, abyss_data, promo_codes)
+    context["background_image_url"] = background_collector.get_random_background_url()
+
+    html_template = env.get_template("report.html.j2")
+    html_path = OUTPUT_DIR / "report.html"
+    html_path.write_text(html_template.render(context), encoding="utf-8")
+
+    return html_path, html_path
+
+_PERIOD_DATE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})")
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
 OUTPUT_DIR = Path(__file__).resolve().parent.parent
 GUIDE_BASE_URL = "https://genshin-impact-helper-team.github.io/genshin-builds/en"
 
 STAT_COLUMNS = [
-    ("ATK%", "FIGHT_PROP_ATTACK_PERCENT"), ("HP%", "FIGHT_PROP_HP_PERCENT"),
-    ("DEF%", "FIGHT_PROP_DEFENSE_PERCENT"), ("EM", "FIGHT_PROP_ELEMENT_MASTERY"),
-    ("ER%", "FIGHT_PROP_CHARGE_EFFICIENCY"), ("Crit Rate%", "FIGHT_PROP_CRITICAL"),
-    ("Crit DMG%", "FIGHT_PROP_CRITICAL_HURT"),
+    ("ATK%", "FIGHT_PROP_ATTACK_PERCENT",
+     "Tăng % Tấn Công cơ bản. Hầu hết sát thương thường/kỹ năng đều tính theo ATK, nên đa số DPS cần chỉ số này."),
+    ("HP%", "FIGHT_PROP_HP_PERCENT",
+     "Tăng % HP tối đa. Quan trọng với nhân vật tính sát thương/khiên/hồi máu theo HP tối đa (VD Đại Chú Tể, Kokomi)."),
+    ("DEF%", "FIGHT_PROP_DEFENSE_PERCENT",
+     "Tăng % Phòng Ngự. Quan trọng với nhân vật tính sát thương/khiên theo DEF (VD Noelle, Đại Chú Tể khi chắn)."),
+    ("EM", "FIGHT_PROP_ELEMENT_MASTERY",
+     "Tinh Thông Nguyên Tố — tăng sát thương phản ứng nguyên tố (Bốc Hơi, Tan Chảy, Siêu Dẫn, Cháy...). Quan trọng với build carry theo phản ứng."),
+    ("ER%", "FIGHT_PROP_CHARGE_EFFICIENCY",
+     "Hiệu Quả Nạp Nguyên Tố — tăng tốc độ hồi năng lượng để dùng chiêu cuối (Q) thường xuyên hơn. Quan trọng với nhân vật cần Q liên tục hoặc chi phí Q cao."),
+    ("Crit Rate%", "FIGHT_PROP_CRITICAL",
+     "Tỉ lệ gây sát thương bạo kích (crit) trên mỗi đòn đánh."),
+    ("Crit DMG%", "FIGHT_PROP_CRITICAL_HURT",
+     "Lượng sát thương tăng thêm khi đòn đánh bạo kích trúng. Thường build theo tỉ lệ 1 Crit Rate : 2 Crit DMG."),
 ]
 ELEMENT_DMG_PROP = {
     "Fire": "FIGHT_PROP_FIRE_ADD_HURT", "Water": "FIGHT_PROP_WATER_ADD_HURT",
@@ -48,13 +73,69 @@ def _translate_phrase(text: str, terms: dict) -> str:
     parts = [p.strip() for p in text.split("/")]
     return " / ".join(terms.get(p, p) for p in parts)
 
+def _build_guide_url(name_en: str) -> str:
+    if not name_en:
+        return ""
+    slug = name_en.strip().lower().replace(" ", "_")
+    return f"https://genshin-builds.com/vi/character/{slug}"
 
-def _build_score_rows(scores) -> list[dict]:
+from genshin_agent import crimsonwitch_collector
+
+
+def _format_stat_recommendations(build: dict) -> str:
+    """Gộp 2 nguồn: energy (ER range, gần như build nào cũng có) và stat_recommendations
+    (ngưỡng số cụ thể khác ATK/DEF/EM..., chỉ ~23/213 build có, thường là DPS chính).
+    Cả 2 cùng đổ vào khung "Stat Recommendations" trên trang gốc crimsonwitch.com."""
+    parts = []
+
+    energy = build.get("energy")
+    if energy and (energy.get("min") is not None or energy.get("max") is not None):
+        lo, hi = energy.get("min"), energy.get("max")
+        if lo is not None and hi is not None:
+            parts.append(f"ER {lo}–{hi}%")
+        elif lo is not None:
+            parts.append(f"ER ≥ {lo}%")
+        elif hi is not None:
+            parts.append(f"ER ≤ {hi}%")
+
+    for r in build.get("stat_recommendations", []):
+        text = f"{r['stat']} {r['prefix']} {r['value']}"
+        if r.get("condition"):
+            text += f" ({r['condition']})"
+        parts.append(text)
+
+    return "; ".join(parts) if parts else "(không có khuyến nghị chỉ số cụ thể)"
+
+
+def _get_crimsonwitch_builds_safe() -> dict[str, list[dict]]:
+    """Fetch build data 1 lần cho cả report (không phải 1 lần/nhân vật).
+    Nếu crimsonwitch.com lỗi/sập, trả {} — report vẫn tiếp tục chạy bình thường,
+    chỉ thiếu phần badge stat recommendation (không crash toàn bộ report)."""
+    try:
+        return crimsonwitch_collector.get_all_builds()
+    except Exception as e:
+        print(f"  [warn] Không lấy được Stat Recommendations từ crimsonwitch.com: {e}")
+        return {}
+
+
+def _build_score_rows(scores, all_builds: dict[str, list[dict]]) -> list[dict]:
     rows = []
     for s in scores:
         dmg_prop = ELEMENT_DMG_PROP.get(s.element)
+        name_en = asset_manager.get_avatar_name_en(s.avatar_id)
+
+        char_builds = all_builds.get(name_en, [])
+        stat_builds = [
+            {
+                "label": b.get("build_name", f"Build {i+1}"),
+                "tooltip": _format_stat_recommendations(b),   # đổi: truyền cả b, không phải b.get("stat_recommendations", [])
+            }
+            for i, b in enumerate(char_builds)
+        ]
+
         rows.append({
             "name": s.name,
+            "build_guide_url": _build_guide_url(name_en),
             "element_vi": ELEMENT_VI.get(s.element, s.element),
             "element_color": ELEMENT_COLORS.get(s.element, "#7eb8d4"),
             "level": s.level,
@@ -65,10 +146,11 @@ def _build_score_rows(scores) -> list[dict]:
                 {"name": n, "count": c, "icon_url": s.artifact_set_icons.get(n, "")}
                 for n, c in s.artifact_sets.items()
             ],
-            "stat_values": [s.stats.get(prop_id, 0) for _, prop_id in STAT_COLUMNS],
+            "stat_values": [s.stats.get(prop_id, 0) for _, prop_id, _ in STAT_COLUMNS],
             "dmg_bonus": s.stats.get(dmg_prop, 0) if dmg_prop else 0,
             "artifact_issue_count": len(s.artifact_issues),
             "low_talent_names": list(s.low_talents.keys()),
+            "stat_builds": stat_builds,
         })
     return rows
 
@@ -105,8 +187,8 @@ def _build_guide_accordions(scores, guides: dict) -> list[dict]:
         })
     return accordions
 
+
 def _build_item_icon_map(score_rows: list[dict], accordions: list[dict]) -> dict[str, str]:
-    """Gộp tất cả tên item (đã dịch VI) -> icon url, dùng để bôi hover trong text AI."""
     icon_map: dict[str, str] = {}
     for row in score_rows:
         if row["weapon_name"] and row["weapon_icon_url"]:
@@ -126,8 +208,6 @@ def _build_item_icon_map(score_rows: list[dict], accordions: list[dict]) -> dict
 
 
 def _wrap_known_items(html: str, icon_map: dict[str, str]) -> str:
-    """Bôi tooltip ảnh hover cho các tên item đã biết, xuất hiện trong text AI.
-    Thay 1 lần bằng regex (không lặp), tên dài xét trước để tránh khớp nhầm chuỗi con."""
     if not icon_map:
         return html
     names = sorted((n for n in icon_map if n.strip()), key=len, reverse=True)
@@ -142,37 +222,104 @@ def _wrap_known_items(html: str, icon_map: dict[str, str]) -> str:
 
     return pattern.sub(_replace, html)
 
-def _build_context(nickname, ar, analysis: AccountAnalysis, plan: DailyPlan) -> dict:
-    score_rows = _build_score_rows(analysis.scores)
-    accordions = _build_guide_accordions(analysis.scores, analysis.guides)
-    icon_map = _build_item_icon_map(score_rows, accordions)
-    llm_advice_html = _wrap_known_items(markdown.markdown(analysis.llm_advice), icon_map)
+
+def _build_abyss_context(abyss_data) -> dict | None:
+    """abyss_data: None hoặc tuple (period_title, list[FloorData], list[FloorWarning])
+    từ abyss_pipeline.get_abyss_data() + abyss_planner.generate_warnings()."""
+    if abyss_data is None:
+        return None
+    period_title, floors, warnings = abyss_data
+    warnings_by_floor = {w.floor_number: w for w in warnings}
+
+    floor_ctx = []
+    for floor in floors:
+        fw = warnings_by_floor.get(floor.floor_number)
+        chambers_ctx = []
+        for idx, ch in enumerate(floor.chambers, start=1):
+            cw = next((c for c in fw.chambers if c.chamber_index == idx), None) if fw else None
+            halves_ctx = []
+            if cw:
+                for hw in cw.halves:
+                    halves_ctx.append({
+                        "half": hw.half,
+                        "enemies": [
+                            {
+                                "name":    ew.enemy_name,
+                                "count":   ew.count,
+                                "use":     ew.use,
+                                "avoid":   ew.avoid,
+                                "note":    ew.note,
+                                "unknown": ew.unknown,
+                            }
+                            for ew in hw.enemies
+                        ],
+                    })
+            chambers_ctx.append({
+                "chamber_index": idx,
+                "level":         ch.level,
+                "target":        ch.target,
+                "note_vi":       getattr(ch, "note_vi", "") or "",
+                "halves":        halves_ctx,
+            })
+        floor_ctx.append({
+            "floor_number":       floor.floor_number,
+            "ley_line_disorder":  floor.ley_line_disorder,
+            "chambers":           chambers_ctx,
+        })
+
+    date_match = _PERIOD_DATE_RE.search(period_title)
+    period_label = f"Kỳ bắt đầu {date_match.group(1)}" if date_match else period_title
 
     return {
-        "report_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "nickname": nickname,
-        "ar": ar,
-        "stat_columns": [label for label, _ in STAT_COLUMNS],
-        "scores": score_rows,
-        "llm_advice": analysis.llm_advice,
-        "llm_advice_html": llm_advice_html,
-        "guide_accordions": accordions,
-        "day_of_week": plan.day_of_week,
-        "required_todos": plan.required_todos,
-        "optional_todos": plan.optional_todos,
+        "period_title": period_title,
+        "period_label": period_label,
+        "floors":       floor_ctx,
     }
 
 
-def generate_reports(nickname, ar, analysis, plan) -> tuple[Path, Path]:
-    env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)))
-    context = _build_context(nickname, ar, analysis, plan)
+def _build_promo_codes_context(promo_codes) -> list[dict] | None:
+    """promo_codes: None hoặc list[PromoCode] từ promo_code_pipeline.get_active_promo_codes()."""
+    if promo_codes is None:
+        return None
+    return [
+        {
+            "code":           pc.code,
+            "server_label":   pc.server_label,
+            "rewards":        [{"name": n, "count": c} for n, c in pc.rewards],
+            "discovery_date": pc.discovery_date,
+            "expiry_label":   pc.expiry_label,
+            "notes":          pc.notes,
+        }
+        for pc in promo_codes
+    ]
 
-    html_template = env.get_template("report.html.j2")
-    html_path = OUTPUT_DIR / "report.html"
-    html_path.write_text(html_template.render(context), encoding="utf-8")
 
-    md_template = env.get_template("report.md.j2")
-    md_path = OUTPUT_DIR / "report.md"
-    md_path.write_text(md_template.render(context), encoding="utf-8")
+def _build_context(nickname, ar, analysis: AccountAnalysis, plan: DailyPlan,
+                   abyss_data=None, promo_codes=None) -> dict:
+    all_builds = _get_crimsonwitch_builds_safe()
+    score_rows = _build_score_rows(analysis.scores, all_builds)
+    accordions = _build_guide_accordions(analysis.scores, analysis.guides)
+    icon_map   = _build_item_icon_map(score_rows, accordions)
+    llm_advice_html = _wrap_known_items(markdown.markdown(analysis.llm_advice), icon_map)
 
-    return html_path, md_path
+    return {
+        "report_date":      datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "nickname":         nickname,
+        "ar":               ar,
+        "stat_columns": [(label, tip) for label, _, tip in STAT_COLUMNS],
+        "scores":           score_rows,
+        "llm_advice":       analysis.llm_advice,
+        "llm_advice_html":  llm_advice_html,
+        "guide_accordions": accordions,
+        "day_of_week":      plan.day_of_week,
+        "required_todos":   plan.required_todos,
+        "optional_todos":   plan.optional_todos,
+        "abyss":            _build_abyss_context(abyss_data),
+        "promo_codes":      _build_promo_codes_context(promo_codes),
+    }
+
+def _build_guide_url(name_en: str) -> str:
+    if not name_en:
+        return ""
+    slug = name_en.strip().lower().replace(" ", "_")
+    return f"https://genshin-builds.com/vi/character/{slug}"

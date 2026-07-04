@@ -140,7 +140,10 @@ def _parse_talents(section) -> list[str]:
 
 
 def fetch_character_guide(display_name: str) -> dict | None:
-    """Lấy guide đầy đủ cho 1 nhân vật. None nếu không tìm thấy trên genshin-builds."""
+    """Lấy guide đầy đủ cho 1 nhân vật, TÁCH THEO TỪNG ROLE (dps/support/...).
+    Trang genshin-builds có thể có nhiều role/build khác nhau (mỗi role 1
+    <section class="build-card" data-id="...">) — gộp chung sẽ lẫn dữ liệu
+    giữa các role (đã xác nhận qua debug thực tế với Bennett)."""
     index = _get_character_index()
     slug = _resolve_slug(display_name, index)
     if not slug:
@@ -153,12 +156,29 @@ def fetch_character_guide(display_name: str) -> dict | None:
         return None
 
     soup = BeautifulSoup(html, "html.parser")
+
+    role_sections = soup.select("section.build-card[data-id]")
+    if not role_sections:
+        print(f"  [warn] Không tìm thấy build-card nào cho '{display_name}' — cấu trúc trang có thể đã đổi")
+        return None
+
+    layout = soup.select_one(".character-builds-layout[data-default-build]")
+    default_role = layout.get("data-default-build") if layout else None
+
+    roles = {}
+    for section in role_sections:
+        role_id = section.get("data-id")
+        roles[role_id] = {
+            "weapons": _parse_weapons(_section_after(section, "Weapons")),
+            "artifact_sets": _parse_artifact_sets(_section_after(section, "Artifact Sets")),
+            "artifact_stats": _parse_artifact_stats(_section_after(section, "Artifact Stats")),
+            "talents": _parse_talents(_section_after(section, "Talents")),
+        }
+
     return {
         "slug": slug,
-        "weapons": _parse_weapons(_section_after(soup, "Weapons")),
-        "artifact_sets": _parse_artifact_sets(_section_after(soup, "Artifact Sets")),
-        "artifact_stats": _parse_artifact_stats(_section_after(soup, "Artifact Stats")),
-        "talents": _parse_talents(_section_after(soup, "Talents")),
+        "default_role": default_role,
+        "roles": roles,
     }
 
 def _cache_get(avatar_id: int) -> dict | None:
@@ -169,28 +189,22 @@ def _cache_get(avatar_id: int) -> dict | None:
         return None
     return {
         "slug": row["slug"],
-        "weapons": json.loads(row["weapons_json"]),
-        "artifact_sets": json.loads(row["artifact_sets_json"]),
-        "artifact_stats": json.loads(row["artifact_stats_json"]),
-        "talents": json.loads(row["talents_json"]),
+        "default_role": row["default_role"],
+        "roles": json.loads(row["roles_json"]),
     }
 
 
 def _cache_set(avatar_id: int, guide: dict):
     conn = get_connection()
     conn.execute(
-        """INSERT INTO character_guides (avatar_id, slug, weapons_json, artifact_sets_json, artifact_stats_json, talents_json, fetched_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)
+        """INSERT INTO character_guides (avatar_id, slug, default_role, roles_json, fetched_at)
+           VALUES (?, ?, ?, ?, ?)
            ON CONFLICT(avatar_id) DO UPDATE SET
-               slug=excluded.slug, weapons_json=excluded.weapons_json,
-               artifact_sets_json=excluded.artifact_sets_json, artifact_stats_json=excluded.artifact_stats_json,
-               talents_json=excluded.talents_json, fetched_at=excluded.fetched_at""",
+               slug=excluded.slug, default_role=excluded.default_role,
+               roles_json=excluded.roles_json, fetched_at=excluded.fetched_at""",
         (
-            avatar_id, guide["slug"],
-            json.dumps(guide["weapons"], ensure_ascii=False),
-            json.dumps(guide["artifact_sets"], ensure_ascii=False),
-            json.dumps(guide["artifact_stats"], ensure_ascii=False),
-            json.dumps(guide["talents"], ensure_ascii=False),
+            avatar_id, guide["slug"], guide.get("default_role"),
+            json.dumps(guide["roles"], ensure_ascii=False),
             datetime.now().isoformat(),
         ),
     )
@@ -199,15 +213,23 @@ def _cache_set(avatar_id: int, guide: dict):
 
 
 def get_character_guide(avatar_id: int, display_name: str, force_refresh: bool = False) -> dict | None:
-    """force_refresh=False: chỉ đọc cache, không gọi mạng (dùng khi người dùng chọn N).
+    """force_refresh=False: chỉ đọc cache, không gọi mạng — TRỪ trường hợp cache đang ở
+    định dạng cũ (thiếu key "roles", tức trước khi tách theo role dps/support): lúc đó
+    coi như bắt buộc fetch lại vì cache cũ không dùng được với code mới, dù người dùng
+    chọn N. Đây là fetch có mục tiêu hẹp (chỉ đúng nhân vật bị cache cũ), không phải
+    force_refresh toàn bộ database.
     force_refresh=True: crawl lại thật, ghi đè cache (dùng khi chọn Y)."""
-    if not force_refresh:
-        cached = _cache_get(avatar_id)
-        if cached:
-            print(f"  [cache] Guide '{display_name}' từ cache")
-        else:
-            print(f"  [info] Chưa có cache cho '{display_name}' (chọn Y update database để lấy lần đầu)")
+    cached = None if force_refresh else _cache_get(avatar_id)
+
+    if cached is not None and "roles" in cached:
+        print(f"  [cache] Guide '{display_name}' từ cache")
         return cached
+
+    if cached is not None and "roles" not in cached:
+        print(f"  [info] Cache '{display_name}' ở định dạng cũ (chưa tách role) — tự động crawl lại...")
+    elif not force_refresh:
+        print(f"  [info] Chưa có cache cho '{display_name}' (chọn Y update database để lấy lần đầu)")
+        return None
 
     guide = fetch_character_guide(display_name)
     if guide:

@@ -1,0 +1,227 @@
+{{Imaginarium Theater Season
+|season       = 24
+|startVersion = Luna VII
+|start        = 2026-06-01
+|end          = 2026-06-30
+|prev         = 2026-05-01
+|next         = 2026-07-01
+|characters   = Klee; Xiangling; Kamisato Ayaka; Chongyun; Albedo; Noelle
+|blessing     = After the above characters join your party, Max HP, ATK, and DEF are increased by 20%.
+|elements     = Pyro; Cryo; Geo
+|guests       = Sangonomiya Kokomi; Aino; Prune; Fischl
+|enemies      = Perpetual Mechanical Array*Lv. 90;Maguu Kenki*Lv. 92;Millennial Pearl Seahorse*Lv. 95;Legatus Golem*Lv. 100
+}}
+
+==Battles==
+===Act 1===
+;Battle{{Colon}} Normal
+* '''Stage Effects''':
+** '''Treacherous Thunder''': A period of time after the challenge begins, thunder will descend and strike your characters.
+{{Domain Enemies
+|target1    = Defeat all opponents<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|75}}s
+|level1     = Easy Mode: 75<br>Normal Mode: 80<br>Hard/Visionary Mode: 85
+|advantage1 = {{Color|Pyro}} characters have an advantage
+|enemies1   = Cryo Abyss Mage*1//Ice Shieldwall Mitachurl*1//Frostarm Lawachurl*1
+
+|target2    = Defeat all opponents<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|80}}s
+|level2     = Easy Mode: 75<br>Normal Mode: 80<br>Hard/Visionary Mode: 85
+|advantage2 = {{Color|Cryo}} characters have an advantage
+|enemies2   = Large Hydro Slime*3//Grounded Hydroshroom*2//Thunderhelm Lawachurl*1/{{Aura|Engulfing Storm}}
+}}
+
+;Battle{{Colon}} Elite Assault
+* '''Stage Effects''':
+** '''Treacherous Thunder''': A period of time after the challenge begins, thunder will descend and strike your characters.
+** '''Enemy En Garde''': Opponents within a certain radius of opponents affected by this buff have their ATK increased by {{Color|bp|50%}} and their All Elemental and Physical RES increased by {{Color|bp|30%}}.
+{{Domain Enemies
+|target1    = Defeat all opponents<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|85}}s
+|level1     = Easy Mode: 75<br>Normal Mode: 80<br>Hard/Visionary Mode: 85
+|advantage1 = Focus fire on a single enemy<br>Pneuma-aligned attacks have an advantage
+|enemies1   = Ruin Grader*1;Ruin Destroyer*3//Construction Specialist Mek - Ousia*1;Assault Specialist Mek - Ousia*2
+}}
+
+===Act 2===
+;Battle{{Colon}} Normal
+* '''Stage Effects''':
+** '''Treacherous Thunder''': A period of time after the challenge begins, thunder will descend and strike your characters.
+{{Domain Enemies
+|target1    = Defeat all opponents<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|75}}s
+|level1     = Easy Mode: 75<br>Normal Mode: 80<br>Hard/Visionary Mode: 85
+|advantage1 = {{Color|Geo}} characters have an advantage
+|enemies1   = Tainted Water-Spouting Phantasm*1//Praetorian Golem*3
+
+|target2    = Defeat all opponents<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|80}}s
+|level2     = Easy Mode: 75<br>Normal Mode: 80<br>Hard/Visionary Mode: 85
+|advantage2 = {{Color|Pyro}} characters have an advantage
+|enemies2   = Koholasaurus*2//Eroding Avatar of Lava*2
+}}
+
+;Battle{{Colon}} Elite Assault
+* '''Stage Effects''':
+** '''Treacherous Thunder''': A period of time after the challenge begins, thunder will descend and strike your characters.
+** '''Horrific Explosion''': Some opponents will enter the field with time bombs on them that will explode after a period of time, dealing DMG to nearby characters, after which this bomb will transfer to the nearest on-field opponent, resetting the bomb's timer. The bomb will transfer using the same rules after an opponent carrying it is defeated. The maximum bomb timer and bomb DMG will decrease and increase respectively with each transfer. These modifications can stack. Max {{Color|bp|4}} stacks.
+{{Domain Enemies
+|target1    = Defeat all opponents<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|65}}s
+|level1     = Easy Mode: 75<br>Normal Mode: 80<br>Hard/Visionary Mode: 85
+|enemies1   = Tatankasaurus*1;Tatankasaurus Warrior: Skybreaker*1;Tatankasaurus Warrior: Spiritlight Chaser*1//Qucusaurus*1;Qucusaurus Warrior: Heartstar Hammer*1;Qucusaurus Warrior: Blazing Sky*1
+}}
+
+===Act 3===
+{{Description|A mysterious ruin machine that can reconfigure itself into various forms. In battle, the Perpetual Mechanical Array will enter the Absolute Defense state, in which it splits and summons several different kinds of Ruin Sentinels. After {{Color|bp|defeating the enhanced Ruin Sentinels}}, Absolute Defense state will be removed and it will enter a weakened state.|Perpetual Mechanical Array}}
+;Battle{{Colon}} Climactic Showdown
+{{Domain Enemies
+|target1    = Defeat the Villain(s) within the time limit (120s)<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|80}}s
+|level1     = Easy Mode: 80<br>Normal Mode: 85<br>Hard Mode: 90
+|advantage1 = Focus fire on a single enemy
+|enemies1   = Perpetual Mechanical Array
+}}
+
+===Arcana Challenge I===
+{{Description|Keep fighting until the countdown ends. End the stage with at least one character left standing to successfully complete the challenge. Each opponent you defeat will take time off the countdown.<br>Once the challenge begins, Geo Bursts will periodically be set off, dealing Geo DMG to your active character.|Keep Fighting}}
+* '''Stage Effects''':
+** '''Geo Discharge''': Once the challenge begins, Geo Bursts will periodically be set off, dealing Geo DMG to your active character(s)
+{{Domain Enemies
+|target1    = {{Color|#764bf7|Arcana Challenge}} Keep fighting until the countdown ends (360s)<br>{{Color|help|"Star Challenge"}} Defeat {{Color|bp|10}} opponents
+|level1     = 100
+|advantage1 = Shields have an advantage
+|enemies1   = Consecrated Fanged Beast*-;Consecrated Scorpion*-;Consecrated Horned Crocodile*-;Consecrated Red Vulture*-
+}}
+
+===Act 4===
+;Battle{{Colon}} Defense Sequence
+{{Domain Enemies
+|target1    = Prevent the Ley Line Monolith's destruction. Defeat opponents to deplete the timer (180s)<br>{{Color|help|"Star Challenge"}} Ley Line Monolith's remaining HP not less than {{Color|bp|35}}%
+|level1     = Normal Mode: 85<br>Hard/Visionary Mode: 90
+|enemies1   = Ruin Guard*-;Hydro Slime*-
+
+|target2    = Prevent the Ley Line Monolith's destruction. Defeat opponents to deplete the timer (250s)<br>{{Color|help|"Star Challenge"}} Ley Line Monolith's remaining HP not less than {{Color|bp|35}}%
+|level2     = Normal Mode: 85<br>Hard/Visionary Mode: 90
+|enemies2   = Nobushi: Kikouban*-;Nobushi: Hitsukeban*-;Treasure Hoarders: Crusher*-;Treasure Hoarders: Pyro Potioneer*-;Treasure Hoarders: Cryo Potioneer*-;Treasure Hoarders: Hydro Potioneer*-;Treasure Hoarders: Electro Potioneer*-
+}}
+
+;Battle{{Colon}} High-Pressure Defense
+{{Domain Enemies
+|target1    = Prevent the Ley Line Monolith's destruction. Defeat opponents to deplete the timer (240s)<br>{{Color|help|"Star Challenge"}} Ley Line Monolith's remaining HP not less than {{Color|bp|35}}%
+|level1     = Normal Mode: 85<br>Hard/Visionary Mode: 90
+|advantage1 = Enemies Are Easily Grouped<br>{{Color|Pyro}} characters have an advantage<br>Powerful foes present
+|enemies1   = Eroding Avatar of Lava*-;Large Cryo Slime*-;Large Hydro Slime*-;Cryo Slime*-;Hydro Slime*-
+}}
+
+===Act 5===
+;Battle{{colon}} Normal
+{{Domain Enemies
+|target1    = Defeat as many opponents as possible (at least 4) within the time limit (120s)<br>{{Color|help|"Star Challenge"}} Defeat {{Color|bp|5}} opponents
+|level1     = Normal Mode: 85<br>Hard/Visionary Mode: 90
+|enemies1   = Ruin Guard*-;Ruin Grader*-
+
+|target2    = Defeat as many opponents as possible (at least 20) within the time limit (120s)<br>{{Color|help|"Star Challenge"}} Defeat {{Color|bp|24}} opponents
+|level2     = Normal Mode: 85<br>Hard/Visionary Mode: 90
+|advantage2 = {{Color|Cryo}} characters have an advantage
+|enemies2   = Hydro Mimic Boar*-;Hydro Mimic Crane*-;Hydro Mimic Squirrel*-;Hydro Mimic Mallard*-;Hydro Mimic Finch*-;Hydro Mimic Crab*-;Hydro Mimic Frog*-
+}}
+
+;Battle{{Colon}} Elite Assault
+* '''Stage Effects''':
+** '''Candescent Chaos''': A Chaos Cluster will chase characters around once the challenge begins. When the Chaos Cluster touches a character or opponents, it will deal immense DMG to them. If it touches a character, it will disappear. The size and DMG dealt by these clusters will gradually bleed away and grow smaller, but its speed will also gradually increase.
+{{Domain Enemies
+|target1    = Defeat as many opponents as possible (at least 8) within the time limit (120s)<br>{{Color|help|"Star Challenge"}} Defeat {{Color|bp|10}} opponents
+|level1     = Normal Mode: 85<br>Hard/Visionary Mode: 90
+|advantage1 = {{Color|Pyro}} characters have an advantage<br>{{Color|Cryo}} characters have an advantage<br>Elemental effects advantage
+|enemies1   = Fatui Cryo Cicin Mage*-;Fatui Electro Cicin Mage*-;Fatui Skirmisher - Electrohammer Vanguard*-;Fatui Skirmisher - Cryogunner Legionnaire*-
+}}
+
+===Act 6===
+{{Description|An autonomous humanoid swordsman that has mysteriously lost control and now patrols the pace where fate was severed, engaging in endless combat.<br>Long-range attacks can trigger the Maguu Kenki's mask parry. Maguu Kenki are tricky enemies who excel at using phantoms and mask parries to unleash devastating attacks on their opponents. Pay careful attention and evade these attacks in time...|Maguu Kenki}}
+;Battle{{Colon}} Climactic Showdown
+{{Domain Enemies
+|target1    = Defeat the Villain(s) within the time limit (110s)<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|75}}s
+|level1     = Normal Mode: 90<br>Hard/Visionary Mode: 92
+|advantage1 = 
+|enemies1   = Maguu Kenki
+}}
+
+===Arcana Challenge II===
+{{Description|Keep fighting until the countdown ends. End the stage with at least one character left standing to successfully complete the challenge. Each opponent you defeat will take time off the countdown.<br>Once the challenge begins, Pyro Bursts will periodically be set off, dealing Pyro DMG to your active character.|Keep Fighting}}
+* '''Stage Effects''':
+** '''Pyro Discharge''': Once the challenge begins, Pyro Bursts will periodically be set off, dealing Pyro DMG to your active character(s)
+{{Domain Enemies
+|target1    = {{Color|#764bf7|Arcana Challenge}} Keep fighting until the countdown ends (360s)<br>{{Color|help|"Star Challenge"}} Defeat {{Color|bp|10}} opponents
+|level1     = 100
+|advantage1 = Bows have an advantage<br>Shields have an advantage
+|enemies1   = Ruin Grader*-;Ruin Guard*-;Ruin Drake: Skywatch*-;Ruin Drake: Earthguard*-
+}}
+
+===Act 7===
+;Battle{{Colon}} Normal
+* '''Stage Effects''':
+** '''Survival Pressure''': A period of time after the challenge begins, all party members will continuously lose small amounts of HP.
+{{Domain Enemies
+|target1    = Defeat all opponents<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|85}}s
+|level1     = 92
+|advantage1 = Elemental effects advantage<br>Shields have an advantage
+|enemies1   = Abyss Lector: Violet Lightning*2
+
+|target2    = Defeat all opponents<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|80}}s
+|level2     = 92
+|advantage2 = Multi Elemental DMG has an advantage
+|enemies2   = Hydro Hilichurl Rogue*1//Domain Keeper*2
+}}
+
+;Battle{{Colon}} Elite Assault
+* '''Stage Effects''':
+** '''Survival Pressure''': A period of time after the challenge begins, all party members will continuously lose small amounts of HP.
+** '''Thrilling Duel''': When the active character is within the Duel Zone of an elite opponent, that character's DMG will be increased by {{Color|bp|40%}}. When they are outside a Duel Zone, they will take DMG every {{Color|bp|2}}s.
+{{Domain Enemies
+|target1    = Defeat all opponents<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|80}}s
+|level1     = 92
+|advantage1 = Shields have an advantage<br>Melee has an advantage
+|enemies1   = Stonehide Lawachurl*1//Annihilation Specialist Mek - Pneuma*1//Consecrated Flying Serpent*1
+}}
+
+===Act 8===
+{{Description|A lonesome lord of seahorses that has gained the form of a fantastical beast and has surpassed almost all other Fontemer Aberrants. The {{Color|bp|Xenomare Pearl}} beneath its head is a crystallization of {{Color|bp|Electro}} that will allow it to use more powerful elemental attacks and possess stronger defensive abilities. Other than using {{Color|bp|Elemental Reactions}} to destroy the Xenomare Pearl, you can also destroy the Resonant Coral Orbs it creates while guiding Fontemer Hoarthunder to deal effective DMG to said Pearl.|Millennial Pearl Seahorse}}
+;Battle{{Colon}} Climactic Showdown
+{{Domain Enemies
+|target1    = Defeat the Villain(s) within the time limit (110s)<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|75}}s
+|level1     = 95
+|advantage1 = Elemental effects advantage
+|enemies1   = Millennial Pearl Seahorse*1
+}}
+
+===Act 9===
+;Battle{{Colon}} Normal
+{{Domain Enemies
+|target1    = Defeat a specific number of Bounties (2) within the time limit (85s)<br>{{Color|help|"Star Challenge"}} Complete the main challenge objective within {{Color|bp|55}}s
+|level1     = 95
+|enemies1   = Stonehide Lawachurl{ text = - $ danger = 1 };Pyro Hilichurl Shooter*-;Electro Hilichurl Shooter*-;Hilichurl Berserker*-;Hilichurl Grenadier*-;Hilichurl Fighter*-;Electro Hilichurl Grenadier*-
+
+|target2    =  Defeat a specific number of Bounties (3) within the time limit (110s)<br>{{Color|help|"Star Challenge"}} Complete the main challenge objective within {{Color|bp|75}}s
+|level2     = 95
+|advantage2 = {{Color|Geo}} characters have an advantage
+|enemies2   = Praetorian Golem{ text = - $ danger = 1 };Large Hydro Slime*-
+}}
+
+;Battle{{Colon}} Elite Assault
+* '''Stage Effects''':
+** '''Thrilling Duel''': When the active character is within the Duel Zone of an elite opponent, that character's DMG will be increased by {{Color|bp|40%}}. When they are outside a Duel Zone, they will take DMG every {{Color|bp|2}}s.
+{{Domain Enemies
+|target1    = Defeat a specific number of Bounties (3) within the time limit (120s)<br>{{Color|help|"Star Challenge"}} Complete the main challenge objective within {{Color|bp|80}}s
+|level1     = 95
+|advantage1 = Bows have an advantage
+|enemies1   = Ruin Drake: Earthguard{ text = - $ danger = 1 };Ruin Drake: Skywatch{ text = - $ danger = 1 };Ruin Scout*-;Ruin Destroyer*-;Ruin Defender*-;Ruin Cruiser*-
+}}
+
+===Act 10===
+{{Description|This ancient Legatus Golem uses its sturdy marble body to defend against attacks while using music and searing flames to obliterate its foes. Use {{Color|bp|methods suited to dealing with Geo}} to break through its defenses. Apart from this, it will also set up resonators in combat that will assist its attacks. {{Color|bp|Destroy these resonators}} to deplete its shielding effectively.|Legatus Golem}}
+;Battle{{Colon}} Climactic Showdown
+{{Domain Enemies
+|target1    = Defeat the Villain(s) within the time limit (120s)<br>{{Color|help|"Star Challenge"}} Defeat all opponents within {{Color|bp|80}}s
+|level1     = 100
+|advantage1 = {{Color|Geo}} characters have an advantage
+|enemies1   = Legatus Golem
+}}
+
+[[fr:Théâtre de l'imaginarium/01.06.2026]]
+[[th:โรงละครในจินตนาการ/รอบ/2026-06-01]]
+[[tr:Hayal Dünyası Tiyatrosu/Sezonlar/2026-06-01]]
+[[vi:Nhà Hát Giả Tưởng/Kỳ/2026-06-01]]

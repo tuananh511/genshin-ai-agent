@@ -1,13 +1,18 @@
 # Secrets
 .env
 
-# Virtual env / cache
-.venv
+# Python
 __pycache__/
-.pytest_cache/
 *.pyc
+.pytest_cache/
+*.egg-info/
+.venv/
 
-# Dữ liệu sinh ra lúc chạy — không phải source code
+# Dữ liệu/cache/output cá nhân — mỗi người dùng tự tạo lại khi chạy main.py
 genshin_agent.db
+abyss_cache.json
 report.html
-report.md
+
+# OS
+.DS_Store
+Thumbs.db

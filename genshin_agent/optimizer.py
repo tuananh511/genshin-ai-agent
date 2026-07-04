@@ -67,7 +67,10 @@ def _aggregate_stats(weapon: Weapon | None, artifacts: list[Artifact]) -> dict:
 
 
 def _check_artifact_issues(artifacts: list[Artifact]) -> list[ArtifactIssue]:
-    return [ArtifactIssue(slot=a.slot, level=a.level, issue="not_maxed") for a in artifacts if a.level < MAX_ARTIFACT_LEVEL]
+    return [
+        ArtifactIssue(slot=a.slot, level=a.level, issue="not_maxed")
+        for a in artifacts if a.level < MAX_ARTIFACT_LEVEL
+    ]
 
 
 def _check_low_talents(skill_levels: dict, avatar_id: int) -> dict:
@@ -79,15 +82,19 @@ def _check_low_talents(skill_levels: dict, avatar_id: int) -> dict:
 
 
 def score_character(char: Character) -> CharacterScore:
-    weapon_name = asset_manager.resolve_name(char.weapon.name_hash) if char.weapon else "(không có)"
+    # V3: dùng get_weapon_name(item_id, hash) thay vì resolve_name(hash)
+    # → kích hoạt fallback gi.yatta.moe cho ~11 hash không có trong TextMap
+    weapon_name = (
+        asset_manager.get_weapon_name(char.weapon.item_id, char.weapon.name_hash)
+        if char.weapon else "(không có)"
+    )
     weapon_icon_url = asset_manager.enka_icon_url(char.weapon.icon) if char.weapon else ""
 
     set_counts: dict[str, int] = {}
     set_icons: dict[str, str] = {}
     for a in char.artifacts:
-        set_name = asset_manager.resolve_name(a.set_name_hash)
-        if set_name == "(chưa rõ tên)":
-            set_name = f"(chưa rõ tên #{a.set_name_hash})"
+        # V3: dùng get_reliquary_name(set_id, hash) — tự fallback yatta + tự format hash
+        set_name = asset_manager.get_reliquary_name(a.set_id, a.set_name_hash)
         set_counts[set_name] = set_counts.get(set_name, 0) + 1
         if set_name not in set_icons:
             set_icons[set_name] = asset_manager.enka_icon_url(a.icon)
@@ -122,13 +129,25 @@ def _build_summary_text(scores: list[CharacterScore], guides: dict) -> str:
         sets_text = ", ".join(f"{name} ({count})" for name, count in s.artifact_sets.items())
 
         guide = guides.get(s.avatar_id) or {}
-        if guide:
-            top_weapons = ", ".join(asset_manager.translate_en_name(w["name"]) for w in guide.get("weapons", [])[:5])
-            top_sets = ", ".join(
-                asset_manager.translate_set_label(f"{a['name']} ({a['pieces']})" if a.get("pieces") else a["name"])
-                for a in guide.get("artifact_sets", [])[:3]
+        role_data, role_name = None, None
+        if guide.get("roles"):
+            role_name = guide.get("default_role") or next(iter(guide["roles"]), None)
+            role_data = guide["roles"].get(role_name)
+
+        if role_data:
+            top_weapons = ", ".join(
+                asset_manager.translate_weapon_name_en(w["name"]) for w in role_data.get("weapons", [])[:5]
             )
-            guide_text = f"\n  Guide đề xuất vũ khí (cao→thấp): {top_weapons}\n  Guide đề xuất set (cao→thấp): {top_sets}"
+            top_sets = ", ".join(
+                asset_manager.translate_set_label_en(
+                    f"{a['name']} ({a['pieces']})" if a.get("pieces") else a["name"]
+                )
+                for a in role_data.get("artifact_sets", [])[:3]
+            )
+            guide_text = (
+                f"\n  Guide đề xuất (role: {role_name}) vũ khí (cao→thấp): {top_weapons}"
+                f"\n  Guide đề xuất (role: {role_name}) set (cao→thấp): {top_sets}"
+            )
         else:
             guide_text = "\n  (Không có dữ liệu guide cho nhân vật này)"
 
@@ -144,11 +163,13 @@ def analyze_account(characters: list[Character], update_guides: bool = False) ->
     scores = [score_character(char) for char in characters]
     scores.sort(key=lambda s: len(s.artifact_issues) + len(s.low_talents), reverse=True)
 
-    # Lấy guide cho TẤT CẢ nhân vật — dùng cho cả Accordion (đủ 12) và prompt AI (chỉ top 6)
-    guides = {s.avatar_id: get_character_guide(s.avatar_id, s.name, force_refresh=update_guides) for s in scores}
+    # Lấy guide cho TẤT CẢ nhân vật — dùng cho cả Accordion (đủ 12) và prompt AI (giờ cũng đủ 12)
+    guides = {
+        s.avatar_id: get_character_guide(s.avatar_id, s.name, force_refresh=update_guides)
+        for s in scores
+    }
 
-    top_scores = scores[:6]
-    summary = _build_summary_text(top_scores, guides)
+    summary = _build_summary_text(scores, guides)
 
     prompt = f"""Bạn là chuyên gia Genshin Impact, đang giải thích cho người mới.
 
@@ -157,27 +178,26 @@ QUY TẮC BẮT BUỘC:
 - CHỈ dùng dữ liệu được cung cấp dưới đây. Không tự suy đoán số liệu cụ thể không có trong dữ liệu.
 - Nếu vũ khí/set hiện ra là "(chưa rõ tên)" hoặc chứa "(chưa rõ tên", bỏ qua việc đối chiếu phần đó, không suy đoán tên thật.
 - Không nhắc tên nguồn dữ liệu cụ thể.
-- Định dạng: heading "##" cho mục lớn, gạch đầu dòng "-" cho danh sách — KHÔNG dùng số thứ tự (1. 2. 3.).
-- Với mỗi nhân vật: nếu vũ khí/set đang dùng KHÔNG nằm trong nhóm đề xuất hàng đầu của guide, nói rõ và đề xuất nên farm gì thay thế. Không có guide thì nói rõ chưa có dữ liệu.
+- Định dạng: mỗi dòng là 1 gạch đầu dòng "-". KHÔNG dùng heading "##". KHÔNG đóng khung số lượng cố định (không viết kiểu "3 việc nên làm trước").
+- Chỉ liệt kê nhân vật THỰC SỰ có vấn đề: vũ khí/set đang dùng không nằm trong nhóm đề xuất hàng đầu của guide, hoặc chưa có dữ liệu để đối chiếu, hoặc có talent thấp đáng chú ý. Bỏ qua nhân vật đã ổn — không cố liệt kê cho đủ số lượng.
+- Mỗi dòng: tên nhân vật + vấn đề cụ thể + đề xuất nên farm/làm gì, viết liền trong 1-2 câu.
 
-6 nhân vật cần xem xét nhiều nhất:
+Toàn bộ 12 nhân vật cần xem xét (đã sắp theo mức độ vấn đề giảm dần):
 
 {summary}
 
-Trả lời theo cấu trúc:
-## Đánh giá từng nhân vật
-- (mỗi nhân vật 1-2 câu, đối chiếu trực tiếp vũ khí/set đang dùng với guide)
-
-## 3 việc nên làm trước
-- (3 việc, ngắn gọn, cụ thể tên nhân vật)"""
+Trả lời chỉ bằng danh sách gạch đầu dòng theo đúng quy tắc trên, không thêm heading hay lời mở đầu/kết thúc."""
 
     advice = safe_llm_call([prompt])
     if not advice.strip():
         advice = "Không lấy được phân tích từ AI (rate limit hoặc lỗi server). Chạy lại sau vài giây."
 
     guide_sources = [
-        {"name": s.name, "url": f"https://genshin-impact-helper-team.github.io/genshin-builds/en/{guides[s.avatar_id]['slug']}"}
-        for s in top_scores if guides.get(s.avatar_id, {}).get("slug")
+        {
+            "name": s.name,
+            "url": f"https://genshin-impact-helper-team.github.io/genshin-builds/en/{guides[s.avatar_id]['slug']}",
+        }
+        for s in scores if guides.get(s.avatar_id, {}).get("slug")
     ]
 
     return AccountAnalysis(scores=scores, llm_advice=advice, guide_sources=guide_sources, guides=guides)

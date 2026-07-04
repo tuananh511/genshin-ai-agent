@@ -4,39 +4,181 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Genshin AI Report — {{ nickname }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  body { font-family: 'Segoe UI', sans-serif; max-width: 1500px; margin: 40px auto; padding: 0 24px; background: #0f0f1a; color: #e0e0e0; }
-  h1 { color: #c8a96e; border-bottom: 2px solid #c8a96e; padding-bottom: 8px; }
-  h2 { color: #7eb8d4; margin-top: 40px; }
-  .meta { color: #888; margin-bottom: 30px; }
-  .panel { background: #1a1a2e; border-radius: 10px; padding: 16px; margin: 16px 0; overflow-x: auto; }
+  :root {
+    --bg: #0f0f1a; --text: #e0e0e0; --gold: #c8a96e; --blue: #7eb8d4;
+    --panel-bg: #1a1a2e; --border-muted: #2a2a4a; --muted: #888;
+    --todo-bg: #1e1e3a; --th-bg: #23234a; --tr-hover: #23233f;
+    --green: #a4cf3c; --red: #ef7530;
+  }
+  [data-theme="light"] {
+    --bg: #f4f4fa; --text: #23232f; --gold: #93672f; --blue: #1f6f96;
+    --panel-bg: #ffffff; --border-muted: #e0e0ec; --muted: #6a6a78;
+    --todo-bg: #eef0fb; --th-bg: #e8e9f7; --tr-hover: #eef0fb;
+    --green: #4a8f16; --red: #c14f10;
+    --bg-overlay: rgba(244, 244, 250, 0.82);
+  }
+  body { font-family: 'Montserrat', 'Segoe UI', sans-serif; max-width: 1500px; margin: 40px auto; padding: 0 24px; background: var(--bg); color: var(--text); transition: background .2s, color .2s; }
+  body.has-bg-image::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: -1;
+  background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), var(--report-bg-image);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+  h1 { color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 8px; }
+  h2 { color: var(--blue); margin-top: 40px; }
+  .meta { color: var(--muted); margin-bottom: 30px; }
+  .panel { background: var(--panel-bg); border-radius: 10px; padding: 16px; margin: 16px 0; overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 0.92em; }
-  th { background: #23234a; color: #c8a96e; padding: 10px; text-align: left; white-space: nowrap; }
-  td { padding: 8px 10px; border-bottom: 1px solid #2a2a4a; }
-  tr:hover td { background: #23233f; }
-  tr td:first-child { border-left: 4px solid var(--row-color, #7eb8d4); }
-  a { color: #7eb8d4; }
+  th { background: var(--th-bg); color: var(--gold); padding: 10px; text-align: left; white-space: nowrap; }
+  td { vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--border-muted); }
+  tr:hover td { background: var(--tr-hover); }
+  tr td:first-child { border-left: 4px solid var(--row-color, var(--blue)); }
+  a { color: var(--blue); }
   .element-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
-  .card { background: #1a1a2e; border-radius: 10px; padding: 20px; margin: 16px 0; border-left: 4px solid #7eb8d4; }
-  .todo { background: #1e1e3a; border-radius: 8px; padding: 12px 16px; margin: 8px 0; }
-  .todo .reason { color: #888; font-size: 0.9em; }
-  details.char-accordion { background: #1a1a2e; border-radius: 10px; margin: 10px 0; padding: 10px 16px; border-left: 4px solid var(--acc-color, #7eb8d4); }
-  details.char-accordion summary { cursor: pointer; color: #c8a96e; font-weight: bold; padding: 6px 0; font-size: 1.05em; }
+  .card { background: var(--panel-bg); border-radius: 10px; padding: 20px; margin: 16px 0; border-left: 4px solid var(--blue); }
+  .todo { background: var(--todo-bg); border-radius: 8px; padding: 12px 16px; margin: 8px 0; }
+  .todo .reason { color: var(--muted); font-size: 0.9em; }
+  details.char-accordion { background: var(--panel-bg); border-radius: 10px; margin: 10px 0; padding: 10px 16px; border-left: 4px solid var(--acc-color, var(--blue)); }
+  details.char-accordion summary { cursor: pointer; color: var(--gold); font-weight: bold; padding: 6px 0; font-size: 1.05em; }
   details.char-accordion .accordion-body { margin-top: 10px; line-height: 1.7; }
   details.char-accordion .accordion-body p { margin: 6px 0; }
-  .guide-note { color: #888; font-size: 0.85em; font-style: italic; margin-bottom: 10px; }
-  .item-tip { position: relative; border-bottom: 1px dotted #7eb8d4; cursor: help; white-space: nowrap; }
+  .guide-note { color: var(--muted); font-size: 0.85em; font-style: italic; margin-bottom: 10px; }
+  .item-tip { position: relative; border-bottom: 1px dotted var(--blue); cursor: help; white-space: nowrap; }
   .item-tip img.tip-img {
     display: none; position: absolute; bottom: 130%; left: 0;
     width: 55px; height: 55px; z-index: 50;
-    background: #0f0f1a; border: 1px solid #c8a96e; border-radius: 6px; padding: 2px;
+    background: var(--bg); border: 1px solid var(--gold); border-radius: 6px; padding: 2px;
   }
   .item-tip:hover img.tip-img { display: block; }
+
+  .weapon-icon {
+    width: 32px; height: 32px;
+    object-fit: cover; border-radius: 4px;
+    border: 1px solid var(--border-muted);
+    vertical-align: middle;
+  }
+  .sets-cell { white-space: nowrap; }
+  .set-icon-wrap {
+    position: relative; display: inline-block;
+    margin-right: 6px; cursor: help;
+  }
+
+  .stat-build-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 6px;
+  margin-top: 8px;
+}
+
+.stat-build-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.72em;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: help;
+  white-space: nowrap;
+  background: var(--gold, #caa15a);
+  color: #1a1a1a;
+  border: 1px solid var(--border-muted, rgba(255,255,255,0.15));
+}
+
+.stat-build-badge--empty {
+  background: transparent;
+  color: var(--muted, #888);
+  border: 1px dashed var(--muted, #888);
+}
+
+  .set-icon {
+    width: 32px; height: 32px;
+    object-fit: cover; border-radius: 50%;
+    border: 1px solid var(--border-muted);
+    vertical-align: middle;
+  }
+  .set-badge {
+    position: absolute; bottom: -3px; right: -3px;
+    background: var(--gold); color: var(--bg);
+    font-size: 10px; font-weight: bold;
+    min-width: 14px; height: 14px; padding: 0 1px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+
+  /* ── Abyss section ── */
+  .abyss-floors { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; margin: 16px 0; }
+  .abyss-floor { background: var(--panel-bg); border-radius: 10px; padding: 14px 16px; border-left: 4px solid #b380e0; }
+  .abyss-floor h4 { color: var(--gold); margin: 0 0 6px 0; font-size: 1em; }
+  .abyss-floor .ley { color: var(--green); font-size: 0.85em; margin-bottom: 8px; font-style: italic; }
+  .abyss-chamber { margin: 10px 0; font-size: 0.88em; padding-top: 8px; border-top: 1px solid var(--border-muted); }
+  .abyss-chamber:first-of-type { border-top: none; padding-top: 0; }
+  .abyss-chamber .ch-label { color: var(--blue); font-weight: bold; }
+  .abyss-note { color: var(--muted); font-size: 0.85em; font-style: italic; margin: 4px 0 8px 0; }
+  .half-block { margin: 6px 0; }
+  .half-block .half-label { color: var(--muted); font-size: 0.85em; }
+  .abyss-enemy { margin: 3px 0 3px 10px; line-height: 1.5; }
+  .abyss-enemy .enemy-name { color: var(--text); }
+  .abyss-enemy .enemy-note { color: var(--muted); font-size: 0.85em; margin-left: 4px; }
+  .badge { display: inline-block; font-size: 0.78em; border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
+  .badge-use { background: color-mix(in srgb, var(--green) 20%, transparent); color: var(--green); }
+  .badge-avoid { background: color-mix(in srgb, var(--red) 20%, transparent); color: var(--red); }
+  .badge-unknown { background: var(--border-muted); color: var(--muted); font-style: italic; }
+  .badge-ok { background: var(--th-bg); color: var(--muted); }
+
+  /* ── Gift Codes section ── */
+  .promo-codes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 16px 0; }
+  .promo-card { background: var(--panel-bg); border-radius: 10px; padding: 14px 16px; border-left: 4px solid var(--green); }
+  .promo-card .promo-code { font-family: monospace; font-size: 1.15em; font-weight: bold; color: var(--gold); cursor: pointer; user-select: all; }
+  .promo-card .promo-server { color: var(--blue); font-size: 0.82em; margin-left: 8px; }
+  .promo-card .promo-expiry { color: var(--muted); font-size: 0.82em; margin: 4px 0 8px 0; }
+  .promo-card .promo-reward { font-size: 0.88em; margin: 2px 0; }
+  .promo-card .promo-notes { color: var(--muted); font-size: 0.82em; font-style: italic; margin-top: 6px; }
+
+  .promo-card.used {
+  opacity: 0.45;
+  filter: grayscale(60%);
+}
+
+  /* ── Theme toggle bubble ── */
+  #theme-toggle {
+    position: fixed; bottom: 24px; right: 24px; z-index: 100;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--panel-bg); border: 1px solid var(--gold);
+    color: var(--gold); font-size: 1.3em; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+
+  /* ── Popup ủng hộ tác giả ── */
+  #support-popup {
+    position: fixed; bottom: 24px; right: 84px; z-index: 99;
+    background: var(--panel-bg); border: 1px solid var(--gold); border-radius: 12px;
+    padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.35); text-decoration: none; color: var(--text);
+    max-width: 260px; opacity: 0; transform: translateY(10px) scale(0.95);
+    transition: opacity .35s ease, transform .35s ease; pointer-events: none;
+  }
+  #support-popup.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+  #support-popup .support-emoji { font-size: 1.6em; }
+  #support-popup .support-text { font-size: 0.85em; line-height: 1.3; }
+  #support-popup:hover { border-color: var(--blue); 
+  --bg-overlay: rgba(15, 15, 26, 0.82);}
 </style>
 </head>
-<body>
+<body{% if background_image_url %} class="has-bg-image" style="--report-bg-image: url('{{ background_image_url }}');"{% endif %}>
 
-<h1>⚔️ Genshin AI Account Manager</h1>
+<h1>⚔️ Genshin AI Agent</h1>
 <div class="meta">
   📅 {{ report_date }} &nbsp;|&nbsp;
   👤 {{ nickname }} &nbsp;|&nbsp;
@@ -48,20 +190,45 @@
 <table>
   <tr>
     <th>Nhân vật</th><th>Lv</th><th>Cung mệnh</th><th>Vũ khí</th><th>Set</th>
-    {% for col in stat_columns %}<th>{{ col }}</th>{% endfor %}
-    <th>DMG Bonus</th><th>Vấn đề</th>
+    {% for col in stat_columns %}<th title="{{ col[1] }}">{{ col[0] }}</th>{% endfor %}
+    <th title="% tăng sát thương trực tiếp theo hệ/loại đòn đánh, thường từ Vũ Khí + set 4 món Thánh Di Vật (không tính buff tạm thời trong trận).">DMG Bonus</th>
   </tr>
   {% for s in scores %}
-  <tr>
-    <tr style="--row-color: {{ s.element_color }};">
-    <td><span class="element-dot" style="background:{{ s.element_color }};"></span>{{ s.name }} ({{ s.element_vi }})</td>
+  <tr style="--row-color: {{ s.element_color }};">
+    <td>
+      <span class="element-dot" style="background:{{ s.element_color }};"></span>
+      {% if s.build_guide_url %}<a href="{{ s.build_guide_url }}" target="_blank" rel="noopener">{{ s.name }}</a>{% else %}{{ s.name }}{% endif %}
+      ({{ s.element_vi }})
+      <div class="stat-build-badges">
+        {% if s.stat_builds %}
+          {% for b in s.stat_builds %}
+            <span class="stat-build-badge" title="{{ b.tooltip }}">{{ b.label }}</span>
+          {% endfor %}
+        {% else %}
+          <span class="stat-build-badge stat-build-badge--empty" title="Chưa có dữ liệu gợi ý chỉ số cho nhân vật này">?</span>
+        {% endif %}
+      </div>
+    </td>
     <td>{{ s.level }}</td>
     <td>C{{ s.constellation_count }}</td>
     <td>
-      <span class="item-tip">{{ s.weapon_name }}{% if s.weapon_icon_url %}<img class="tip-img" src="{{ s.weapon_icon_url }}" loading="lazy">{% endif %}</span>
+      {% if s.weapon_icon_url %}
+        <img class="weapon-icon" src="{{ s.weapon_icon_url }}" alt="{{ s.weapon_name }}" title="{{ s.weapon_name }}" loading="lazy">
+      {% else %}
+        {{ s.weapon_name }}
+      {% endif %}
     </td>
-    <td>
-      {% for set in s.sets %}<span class="item-tip">{{ set.name }} ({{ set.count }}){% if set.icon_url %}<img class="tip-img" src="{{ set.icon_url }}" loading="lazy">{% endif %}</span>{% if not loop.last %}, {% endif %}{% endfor %}
+    <td class="sets-cell">
+      {% for set in s.sets %}
+        {% if set.icon_url %}
+          <span class="set-icon-wrap" title="{{ set.name }} ({{ set.count }})">
+            <img class="set-icon" src="{{ set.icon_url }}" alt="{{ set.name }}" loading="lazy">
+            <span class="set-badge">{{ set.count }}</span>
+          </span>
+        {% else %}
+          <span title="{{ set.name }} ({{ set.count }})">{{ set.name }} ({{ set.count }})</span>
+        {% endif %}
+      {% endfor %}
     </td>
     {% for v in s.stat_values %}<td>{{ v }}</td>{% endfor %}
     <td>{{ s.dmg_bonus }}</td>
@@ -71,7 +238,7 @@
       {% if not s.artifact_issue_count and not s.low_talent_names %}✅{% endif %}
     </td>
   </tr>
-  {% endfor %}
+{% endfor %}
 </table>
 </div>
 
@@ -89,36 +256,154 @@
 <h2>📝 Nhắc nhở thêm <span style="font-size:0.6em;color:#888;">(tuỳ chọn — không liên quan farm)</span></h2>
 {% for todo in optional_todos %}
 <div class="todo" style="opacity:0.8;">
-  <strong>{{ todo.label }}</strong>{% if todo.url %} — <a href="{{ todo.url }}" target="_blank" rel="noopener">Mở link ↗</a>{% endif %}<br>
+  {% if todo.icon_url %}
+  <span class="item-tip"><strong>{{ todo.label }}</strong><img class="tip-img" src="{{ todo.icon_url }}" alt=""></span>
+  {% else %}
+  <strong>{{ todo.label }}</strong>
+  {% endif %}
+  {% if todo.url %} — <a href="{{ todo.url }}" target="_blank" rel="noopener">Mở link ↗</a>{% endif %}<br>
   <span class="reason">💡 {{ todo.reason }}</span>
 </div>
 {% endfor %}
 
-<h2>📖 Chi tiết Build Guide</h2>
-{% for acc in guide_accordions %}
-<details class="char-accordion" style="border-left-color: {{ acc.element_color }};">
-  <summary><span class="element-dot" style="background:{{ acc.element_color }};"></span>{{ acc.name }} ({{ acc.element_vi }})</summary>
-  <div class="accordion-body">
-    {% if acc.url %}
-    <p class="guide-note">Đây là bản tóm tắt. Xem chi tiết đầy đủ tại:
-      <a href="{{ acc.url }}" target="_blank" rel="noopener">trang build {{ acc.name }} ↗</a>
-    </p>
-    {% endif %}
-    <p><strong>Vũ khí nên dùng (cao → thấp):</strong>
-      {% for w in acc.weapons %}<span class="item-tip">{{ w.name }}{% if w.icon_url %}<img class="tip-img" src="{{ w.icon_url }}" loading="lazy">{% endif %}</span>{% if not loop.last %}, {% endif %}{% endfor %}
-    </p>
-    <p><strong>Bộ Thánh Di Vật nên dùng:</strong>
-      {% for set in acc.artifact_sets %}<span class="item-tip">{{ set.label }}{% if set.icon_url %}<img class="tip-img" src="{{ set.icon_url }}" loading="lazy">{% endif %}</span>{% if not loop.last %}, {% endif %}{% endfor %}
-    </p>
-    <p><strong>Thuộc tính ưu tiên của TDV:</strong>
-      {% for slot, stat in acc.main_stats.items() %}{{ slot }}: {{ stat }}{% if not loop.last %} | {% endif %}{% endfor %}
-    </p>
-    <p><strong>Ưu tiên chỉ số phụ:</strong> {{ acc.substats | join(" > ") }}</p>
-    <p><strong>Ưu tiên kỹ năng:</strong> {{ acc.talents | join(" > ") }}</p>
-  </div>
-</details>
-{% endfor %}
+{% if abyss %}
+<h2>🌀 Spiral Abyss — {{ abyss.period_label }}</h2>
 
-<footer style="color:#444; text-align:center; margin-top:60px; font-size:0.85em;">Generated by Genshin AI Agent</footer>
+<div class="abyss-floors">
+  {% for floor in abyss.floors %}
+  <div class="abyss-floor">
+    <h4>Floor {{ floor.floor_number }}</h4>
+    {% if floor.ley_line_disorder %}
+    <div class="ley">
+      {% for lld in floor.ley_line_disorder %}✦ {{ lld }}<br>{% endfor %}
+    </div>
+    {% endif %}
+    {% for ch in floor.chambers %}
+    <div class="abyss-chamber">
+      <span class="ch-label">Chamber {{ ch.chamber_index }}</span>
+      <span style="color:#888;"> Lv.{{ ch.level }} — {{ ch.target }}</span>
+      {% if ch.note_vi %}
+      <div class="abyss-note">📝 {{ ch.note_vi | replace("\n", "<br>") }}</div>
+      {% endif %}
+      {% for hw in ch.halves %}
+      <div class="half-block">
+        <span class="half-label">Nửa {{ 'đầu' if hw.half == 1 else 'sau' }}:</span>
+        {% for ew in hw.enemies %}
+        <div class="abyss-enemy">
+          <span class="enemy-name">{{ ew.name }} ×{{ ew.count }}</span>
+          {% if ew.unknown %}
+          <span class="badge badge-unknown">chưa có dữ liệu về quái này</span>
+          {% else %}
+            {% if ew.use %}<span class="badge badge-use">dùng {{ ew.use | join('/') }}</span>{% endif %}
+            {% if ew.avoid %}<span class="badge badge-avoid">tránh {{ ew.avoid | join('/') }}</span>{% endif %}
+            {% if not ew.use and not ew.avoid and not ew.note %}<span class="badge badge-ok">không cảnh báo đặc biệt</span>{% endif %}
+            {% if ew.note %}<span class="enemy-note">{{ ew.note }}</span>{% endif %}
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if promo_codes %}
+<h2>🎁 Gift Codes đang active</h2>
+<div class="promo-codes">
+  {% for pc in promo_codes %}
+  <div class="promo-card" data-code="{{ pc.code }}">
+    <span class="promo-code" onclick="markPromoUsed(this, '{{ pc.code }}')" title="Click để copy">{{ pc.code }}</span>
+    <span class="promo-server">{{ pc.server_label }}</span>
+    <div class="promo-expiry">📅 {{ pc.expiry_label }} · phát hiện {{ pc.discovery_date }}</div>
+    {% for r in pc.rewards %}
+    <div class="promo-reward">• {{ r.name }} ×{{ r.count }}</div>
+    {% endfor %}
+    {% if pc.notes %}<div class="promo-notes">{{ pc.notes }}</div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = "giftCodesUsed";
+  const TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 ngày
+
+  function loadUsedMap() {
+    let map = {};
+    try {
+      map = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    } catch (e) {
+      map = {};
+    }
+    const now = Date.now();
+    let changed = false;
+    for (const code in map) {
+      if (now - map[code] > TTL_MS) {
+        delete map[code];
+        changed = true;
+      }
+    }
+    if (changed) saveUsedMap(map);
+    return map;
+  }
+
+  function saveUsedMap(map) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+  }
+
+  function applyUsedClasses(map) {
+    document.querySelectorAll(".promo-card").forEach(function (card) {
+      const code = card.getAttribute("data-code");
+      if (map[code]) card.classList.add("used");
+    });
+  }
+
+  window.markPromoUsed = function (el, code) {
+    if (navigator.clipboard) navigator.clipboard.writeText(code);
+    const map = loadUsedMap();
+    map[code] = Date.now();
+    saveUsedMap(map);
+    const card = el.closest(".promo-card");
+    if (card) card.classList.add("used");
+  };
+
+  applyUsedClasses(loadUsedMap());
+})();
+</script>
+{% endif %}
+
+
+<footer style="color: var(--muted); text-align:center; margin-top:60px; font-size:0.85em;">Generated by Genshin AI Agent</footer>
+
+<button id="theme-toggle" title="Đổi giao diện sáng/tối" aria-label="Đổi giao diện sáng/tối">🌙</button>
+<a id="support-popup" href="https://me.momo.vn/tuananh511" target="_blank" rel="noopener">
+  <span class="support-emoji">☕</span>
+  <span class="support-text">Ủng hộ tác giả 1 ly cà phê nếu dự án có ích! ❤️</span>
+</a>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var toggleBtn = document.getElementById('theme-toggle');
+    var saved = localStorage.getItem('genshin-report-theme');
+    function applyTheme(theme) {
+      if (theme === 'light') { root.setAttribute('data-theme', 'light'); toggleBtn.textContent = '☀️'; }
+      else { root.removeAttribute('data-theme'); toggleBtn.textContent = '🌙'; }
+    }
+    applyTheme(saved || 'dark');
+    toggleBtn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      applyTheme(next);
+      localStorage.setItem('genshin-report-theme', next);
+    });
+
+    var popup = document.getElementById('support-popup');
+    setTimeout(function () { popup.classList.add('show'); }, 5000);
+  })();
+</script>
+
 </body>
 </html>

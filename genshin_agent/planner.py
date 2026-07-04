@@ -12,6 +12,7 @@ class TodoItem:
     reason: str
     category: str
     url: str | None = None
+    icon_url: str | None = None
 
 
 @dataclass
@@ -90,18 +91,19 @@ def make_resin_plan(analysis: AccountAnalysis) -> DailyPlan:
             label="Kiểm tra Parametric Transformer",
             reason="Cooldown 5 ngày để đổi nguyên liệu — đừng để \"ế\" không dùng",
             category="transformer",
+            icon_url="https://static.wikia.nocookie.net/gensin-impact/images/f/f1/Item_Parametric_Transformer.png/revision/latest?cb=20210312183450",
         ),
         TodoItem(
             label="Daily Check-in trên HoYoLAB",
-            reason="Primogem/Mora miễn phí mỗi ngày",
+            reason="Primogem/Mora miễn phí mỗi ngày — mở link rồi tự tìm logo điểm danh/check-in trên trang",
             category="checkin",
-            url="https://www.hoyolab.com/",
+            url="https://www.hoyolab.com/circles/2/27/official?page_type=27&page_sort=events",
         ),
         TodoItem(
             label="Xem event đang chạy",
             reason="Có thể có Primogem/vật phẩm free từ event giới hạn thời gian",
             category="event",
-            url="https://www.hoyolab.com/genshin/",
+            url="https://www.hoyolab.com/circles/2/27/official?page_type=27&page_sort=events",
         ),
     ]
 

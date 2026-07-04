@@ -26,12 +26,10 @@ def init_db():
         CREATE TABLE IF NOT EXISTS character_guides (
             avatar_id           INTEGER PRIMARY KEY,
             slug                TEXT,
-            weapons_json        TEXT,
-            artifact_sets_json  TEXT,
-            artifact_stats_json TEXT,
-            talents_json        TEXT,
+            default_role        TEXT,
+            roles_json          TEXT,
             fetched_at          TEXT
-        );          
+        );     
 
         CREATE TABLE IF NOT EXISTS characters (
             id                  INTEGER PRIMARY KEY AUTOINCREMENT,

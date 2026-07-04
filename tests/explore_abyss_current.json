@@ -1,0 +1,1067 @@
+{
+  "id": 105,
+  "entrance": {
+    "floorList": [
+      {
+        "id": 1001,
+        "teamNum": 1,
+        "overrideMonsterLevel": 25,
+        "leyLineDisorder": [
+          {
+            "description": "Tăng 75% sát thương Nguyên Tố Hỏa tất cả thành viên đội tạo thành.",
+            "levelConfigName": "LevelEntity_ElementAddHurt_Fire",
+            "visible": true
+          },
+          {
+            "description": "Tăng 200% sát thương tạo ra từ phản ứng Quá Tải.",
+            "levelConfigName": "Level_Explode_Test",
+            "visible": true
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                90,
+                150,
+                210
+              ]
+            },
+            "monsterLevel": 24,
+            "firstMonsterList": [
+              20010501,
+              20010601,
+              20010701
+            ],
+            "secondMonsterList": null
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                90,
+                150,
+                210
+              ]
+            },
+            "monsterLevel": 24,
+            "firstMonsterList": [
+              21010201,
+              21010301,
+              21010401,
+              21010601,
+              21020101,
+              21020201
+            ],
+            "secondMonsterList": null
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                90,
+                150,
+                210
+              ]
+            },
+            "monsterLevel": 24,
+            "firstMonsterList": [
+              21010401,
+              21020101,
+              20010601,
+              20010701,
+              23030101
+            ],
+            "secondMonsterList": null
+          }
+        ]
+      },
+      {
+        "id": 1002,
+        "teamNum": 1,
+        "overrideMonsterLevel": 40,
+        "leyLineDisorder": [
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_ElementAddHurt_Ice",
+            "visible": true
+          },
+          {
+            "description": "Thời gian kéo dài phản ứng Đóng Băng tăng mạnh.",
+            "levelConfigName": "Level_Freeze_Test",
+            "visible": true
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                90,
+                180
+              ]
+            },
+            "monsterLevel": 39,
+            "firstMonsterList": [
+              20010501,
+              20010601,
+              20010701
+            ],
+            "secondMonsterList": null
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Bảo vệ mục tiêu nguyên vẹn lớn hơn {0}%",
+              "values": [
+                20,
+                40,
+                60
+              ]
+            },
+            "monsterLevel": 39,
+            "firstMonsterList": [
+              20011001,
+              20011101,
+              21020201,
+              22010301
+            ],
+            "secondMonsterList": null
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                90,
+                180
+              ]
+            },
+            "monsterLevel": 39,
+            "firstMonsterList": [
+              21030101,
+              21020201,
+              22010301
+            ],
+            "secondMonsterList": null
+          }
+        ]
+      },
+      {
+        "id": 1003,
+        "teamNum": 1,
+        "overrideMonsterLevel": 45,
+        "leyLineDisorder": [
+          {
+            "description": "",
+            "levelConfigName": "Level_Swril_Test",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_ElementAddHurt_Wind",
+            "visible": true
+          },
+          {
+            "description": "Tăng HP quái 50%.",
+            "levelConfigName": "LevelEntity_Monster_HpUp_Lv2",
+            "visible": false
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                90,
+                180
+              ]
+            },
+            "monsterLevel": 44,
+            "firstMonsterList": [
+              20010801,
+              20011201,
+              21010501,
+              21010901,
+              21010301,
+              20010601,
+              20010901,
+              20011301
+            ],
+            "secondMonsterList": null
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                90,
+                180
+              ]
+            },
+            "monsterLevel": 44,
+            "firstMonsterList": [
+              25010301,
+              25010401,
+              25010501,
+              25010601,
+              25030201,
+              25060101,
+              25070101
+            ],
+            "secondMonsterList": null
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                90,
+                120
+              ]
+            },
+            "monsterLevel": 44,
+            "firstMonsterList": [
+              21020201,
+              24010101
+            ],
+            "secondMonsterList": null
+          }
+        ]
+      },
+      {
+        "id": 1004,
+        "teamNum": 1,
+        "overrideMonsterLevel": 50,
+        "leyLineDisorder": [
+          {
+            "description": "Tăng 75% sát thương Nguyên Tố Lôi tất cả thành viên đội gây ra.",
+            "levelConfigName": "LevelEntity_ElementAddHurt_Electric",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "Level_Electric_Test",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_Monster_HpUp_Lv2",
+            "visible": false
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                120,
+                180
+              ]
+            },
+            "monsterLevel": 49,
+            "firstMonsterList": [
+              20011001,
+              20011101,
+              21010201,
+              21010901,
+              22010301
+            ],
+            "secondMonsterList": null
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Bảo vệ mục tiêu nguyên vẹn lớn hơn {0}%",
+              "values": [
+                20,
+                40,
+                60
+              ]
+            },
+            "monsterLevel": 49,
+            "firstMonsterList": [
+              20011001,
+              21010201,
+              21010901,
+              21010701,
+              21020201,
+              22010301
+            ],
+            "secondMonsterList": null
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                90,
+                120
+              ]
+            },
+            "monsterLevel": 49,
+            "firstMonsterList": [
+              21010901,
+              21010201,
+              21030101,
+              21020201,
+              22010301
+            ],
+            "secondMonsterList": null
+          }
+        ]
+      },
+      {
+        "id": 1005,
+        "teamNum": 2,
+        "overrideMonsterLevel": 55,
+        "leyLineDisorder": [
+          {
+            "description": "Khi HP cao hơn 50%, tấn công tăng 25%, phòng ngự tăng 25%.",
+            "levelConfigName": "LevelEntity_TowerBuff_AtkDefUpHighHP",
+            "visible": true
+          },
+          {
+            "description": "Khi HP trên 80%, tăng 20% tốc độ tấn công thường.",
+            "levelConfigName": "LevelEntity_TowerBuff_AtkSpeedHighHP",
+            "visible": true
+          },
+          {
+            "description": "Khi HP trên 80%, tăng 20% tốc độ di chuyển.",
+            "levelConfigName": "LevelEntity_TowerBuff_MoveSpeedHighHP",
+            "visible": true
+          },
+          {
+            "description": "Khi HP trên 95% sẽ tăng 10% tỷ lệ bạo kích, tăng 20% sát thương bạo kích",
+            "levelConfigName": "LevelEntity_TowerBuff_CriticalUpHighHP",
+            "visible": true
+          },
+          {
+            "description": "Tăng HP quái 50%.",
+            "levelConfigName": "LevelEntity_Monster_HpUp_Lv2",
+            "visible": false
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                180,
+                300,
+                420
+              ]
+            },
+            "monsterLevel": 54,
+            "firstMonsterList": [
+              20010901,
+              21011001,
+              20010801
+            ],
+            "secondMonsterList": [
+              22010101
+            ]
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                90,
+                180,
+                240
+              ]
+            },
+            "monsterLevel": 54,
+            "firstMonsterList": [
+              25030201,
+              25030301,
+              25010701,
+              25010601,
+              25020201
+            ],
+            "secondMonsterList": [
+              25070101,
+              25060101,
+              25030301,
+              25010301,
+              25010201
+            ]
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                180,
+                300,
+                420
+              ]
+            },
+            "monsterLevel": 54,
+            "firstMonsterList": [
+              23030101,
+              25010701
+            ],
+            "secondMonsterList": [
+              23020101,
+              25010501
+            ]
+          }
+        ]
+      },
+      {
+        "id": 1006,
+        "teamNum": 2,
+        "overrideMonsterLevel": 60,
+        "leyLineDisorder": [
+          {
+            "description": "Mỗi khi nhân vật thi triển 1 lần kỹ năng nộ sẽ tăng 6% tấn công và phòng ngự của tất cả nhân vật trong đội. Có thể cộng dồn 10 tầng. Từ tầng 5 trở lên, tốc độ tấn công thường và di chuyển của người chơi sẽ tăng 30%.",
+            "levelConfigName": "LevelEntity_TowerBuff_AtkDefUpAfterULT",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_Monster_HpUp_Lv2",
+            "visible": false
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                30,
+                60,
+                120
+              ]
+            },
+            "monsterLevel": 59,
+            "firstMonsterList": [
+              26010101,
+              20010901,
+              21011001,
+              21010201,
+              20010801
+            ],
+            "secondMonsterList": [
+              26010201,
+              20011301,
+              21030301,
+              21010901,
+              21010201,
+              20011201
+            ]
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                90,
+                180,
+                270
+              ]
+            },
+            "monsterLevel": 59,
+            "firstMonsterList": [
+              22010201,
+              21020301,
+              21020201,
+              21020101,
+              21030101,
+              21010501,
+              21010901,
+              21011001,
+              21010601,
+              21010701,
+              21011201,
+              21010301
+            ],
+            "secondMonsterList": [
+              21030201,
+              21030301,
+              20011301,
+              21010501,
+              21010901,
+              21011001,
+              20011201
+            ]
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                120,
+                240,
+                330
+              ]
+            },
+            "monsterLevel": 59,
+            "firstMonsterList": [
+              21020501,
+              21010901,
+              21011001,
+              21030401,
+              21011201
+            ],
+            "secondMonsterList": [
+              22010101,
+              20011301
+            ]
+          }
+        ]
+      },
+      {
+        "id": 1007,
+        "teamNum": 2,
+        "overrideMonsterLevel": 65,
+        "leyLineDisorder": [
+          {
+            "description": "Khi gây bạo kích sẽ nhận Nguyên Tố Tinh Cầu và Nguyên Tố Hạt Nhân. Hiệu quả này mỗi 15s chỉ kích hoạt 1 lần.",
+            "levelConfigName": "LevelEntity_TowerBuff_TowerBuff_CriticalDropElementBall",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_Avatar_CriticalHurtUp",
+            "visible": true
+          },
+          {
+            "description": "Tăng HP quái 50%.",
+            "levelConfigName": "LevelEntity_Monster_HpUp_Lv2",
+            "visible": false
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                120,
+                300,
+                420
+              ]
+            },
+            "monsterLevel": 64,
+            "firstMonsterList": [
+              23010101,
+              23010201,
+              23010301
+            ],
+            "secondMonsterList": [
+              23010101,
+              23010601,
+              23010501
+            ]
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                120,
+                300,
+                390
+              ]
+            },
+            "monsterLevel": 64,
+            "firstMonsterList": [
+              23010101,
+              23010401,
+              23010301
+            ],
+            "secondMonsterList": [
+              23010401,
+              23010601,
+              23010501
+            ]
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                120,
+                330,
+                450
+              ]
+            },
+            "monsterLevel": 64,
+            "firstMonsterList": [
+              23010201,
+              23010301,
+              23010501
+            ],
+            "secondMonsterList": [
+              23010601,
+              23010301,
+              23010501
+            ]
+          }
+        ]
+      },
+      {
+        "id": 1008,
+        "teamNum": 2,
+        "overrideMonsterLevel": 70,
+        "leyLineDisorder": [
+          {
+            "description": "Khi HP dưới 60%, tấn công tăng 50%, phòng ngự tăng 50%.",
+            "levelConfigName": "LevelEntity_TowerBuff_AtkDefUpLowHP",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_TowerBuff_AtkSpeedLowHP",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_TowerBuff_MoveSpeedLowHP",
+            "visible": true
+          },
+          {
+            "description": "Khi HP dưới 30%, tăng 20% tỷ lệ bạo kích, tăng 40% sát thương bạo kích",
+            "levelConfigName": "LevelEntity_TowerBuff_CriticalUpLowHP",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_Monster_HpUp_Lv3",
+            "visible": false
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                180,
+                330,
+                420
+              ]
+            },
+            "monsterLevel": 69,
+            "firstMonsterList": [
+              22010301,
+              22010201
+            ],
+            "secondMonsterList": [
+              22010101
+            ]
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                180,
+                300,
+                360
+              ]
+            },
+            "monsterLevel": 69,
+            "firstMonsterList": [
+              24010101,
+              21010901,
+              21010401,
+              21010301,
+              21010201
+            ],
+            "secondMonsterList": [
+              24010101,
+              21010501,
+              21010701,
+              21010601
+            ]
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                120,
+                180
+              ]
+            },
+            "monsterLevel": 69,
+            "firstMonsterList": [
+              26020101
+            ],
+            "secondMonsterList": [
+              26020201
+            ]
+          }
+        ]
+      }
+    ],
+    "openTime": null
+  },
+  "schedule": {
+    "floorList": [
+      {
+        "id": 1084,
+        "teamNum": 2,
+        "overrideMonsterLevel": 72,
+        "leyLineDisorder": [
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_ElementAddHurt_Fire_50",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_Monster_HpUp_Lv3",
+            "visible": false
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                180,
+                300
+              ]
+            },
+            "monsterLevel": 71,
+            "firstMonsterList": [
+              26200201,
+              26200101
+            ],
+            "secondMonsterList": [
+              24010101
+            ]
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                180,
+                300
+              ]
+            },
+            "monsterLevel": 73,
+            "firstMonsterList": [
+              26210101,
+              26210201
+            ],
+            "secondMonsterList": [
+              24010301
+            ]
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                180,
+                300,
+                420
+              ]
+            },
+            "monsterLevel": 75,
+            "firstMonsterList": [
+              26220101,
+              26220201
+            ],
+            "secondMonsterList": [
+              24030201
+            ]
+          }
+        ]
+      },
+      {
+        "id": 1085,
+        "teamNum": 2,
+        "overrideMonsterLevel": 80,
+        "leyLineDisorder": [
+          {
+            "description": "",
+            "levelConfigName": "LevelBuff_TowerBuff_InNyxState_DamageUp",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_Monster_HpUp_Lv3",
+            "visible": false
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                180,
+                300
+              ]
+            },
+            "monsterLevel": 79,
+            "firstMonsterList": [
+              26210101,
+              25502201,
+              25500101,
+              25505201,
+              26210201,
+              25510501,
+              25510601
+            ],
+            "secondMonsterList": [
+              25410101
+            ]
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                180,
+                300
+              ]
+            },
+            "monsterLevel": 81,
+            "firstMonsterList": [
+              26200101,
+              25501101,
+              25504101,
+              25505101,
+              26200201,
+              25510101,
+              25510201
+            ],
+            "secondMonsterList": [
+              25410201
+            ]
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                180,
+                300,
+                420
+              ]
+            },
+            "monsterLevel": 84,
+            "firstMonsterList": [
+              26220101,
+              25501201,
+              25502101,
+              25503101,
+              26220201,
+              25510301,
+              25510401
+            ],
+            "secondMonsterList": [
+              24090101
+            ]
+          }
+        ]
+      },
+      {
+        "id": 1098,
+        "teamNum": 2,
+        "overrideMonsterLevel": 88,
+        "leyLineDisorder": [
+          {
+            "description": "Tất cả thành viên đội nhận được 75% Buff Sát Thương Nguyên Tố Lôi.",
+            "levelConfigName": "LevelEntity_ElementAddHurt_Electric",
+            "visible": true
+          },
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_Monster_HpUp_Lv3",
+            "visible": false
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                180,
+                300
+              ]
+            },
+            "monsterLevel": 87,
+            "firstMonsterList": [
+              21020501,
+              21020801
+            ],
+            "secondMonsterList": [
+              25080101,
+              25080201,
+              25080301,
+              25100201,
+              25100101,
+              25310301,
+              25310201,
+              23050101
+            ]
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                60,
+                180,
+                300
+              ]
+            },
+            "monsterLevel": 89,
+            "firstMonsterList": [
+              26040101,
+              24061201
+            ],
+            "secondMonsterList": [
+              25510301,
+              25510701,
+              25510201,
+              23060301,
+              23060201
+            ]
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                180,
+                300,
+                420
+              ]
+            },
+            "monsterLevel": 91,
+            "firstMonsterList": [
+              24010301,
+              24030201
+            ],
+            "secondMonsterList": [
+              24061301
+            ]
+          }
+        ]
+      },
+      {
+        "id": 1099,
+        "teamNum": 2,
+        "overrideMonsterLevel": 95,
+        "leyLineDisorder": [
+          {
+            "description": "",
+            "levelConfigName": "LevelEntity_Monster_HpUp_Lv5",
+            "visible": false
+          }
+        ],
+        "chamberList": [
+          {
+            "id": 1,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                180,
+                300,
+                420
+              ]
+            },
+            "monsterLevel": 94,
+            "firstMonsterList": [
+              22110101,
+              22030101,
+              22030201
+            ],
+            "secondMonsterList": [
+              22050201,
+              25090201,
+              25090401,
+              25090301
+            ]
+          },
+          {
+            "id": 2,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                180,
+                300,
+                420
+              ]
+            },
+            "monsterLevel": 97,
+            "firstMonsterList": [
+              24020401,
+              24021101
+            ],
+            "secondMonsterList": [
+              24040101,
+              24040201,
+              24040301,
+              24050101
+            ]
+          },
+          {
+            "id": 3,
+            "challengeTarget": {
+              "type": "Thời gian khiêu chiến còn lại trên {0}s",
+              "values": [
+                180,
+                300,
+                420
+              ]
+            },
+            "monsterLevel": 99,
+            "firstMonsterList": [
+              25410101,
+              26160302
+            ],
+            "secondMonsterList": [
+              24090201
+            ]
+          }
+        ]
+      }
+    ],
+    "openTime": 1742090400
+  },
+  "blessing": [
+    {
+      "description": "",
+      "levelConfigName": "LevelBuff_TowerBuff_FallingAttackTriggerCJB",
+      "visible": true
+    }
+  ],
+  "multipliersAdjustments": null,
+  "closeTime": 1744765199
+}

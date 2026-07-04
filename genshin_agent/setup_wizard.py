@@ -1,7 +1,7 @@
 from pathlib import Path
 
 ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
-DEMO_UID = "DEMO_UID_CUA_BAN"  # << đổi thành 1 UID bạn chấp nhận công khai trước khi đẩy lên Github
+
 
 
 def _read_env() -> dict:
@@ -41,15 +41,13 @@ def ensure_config() -> None:
 
     if not env.get("GENSHIN_UID"):
         print()
-        choice = input("Dùng UID Genshin của bạn? (Y/N — N = dùng UID demo công khai để xem thử): ").strip().lower()
-        if choice == "y":
-            uid = ""
-            while not uid.strip():
-                uid = input("Nhập UID Genshin (xem trong Pause Menu, 9 số): ").strip()
-            env["GENSHIN_UID"] = uid
-        else:
-            print(f"  -> Dùng UID demo: {DEMO_UID}")
-            env["GENSHIN_UID"] = DEMO_UID
+        print("Cần UID Genshin Impact của bạn để phân tích đúng account thật.")
+        print("Xem UID trong Pause Menu (ESC trong game) — dãy 9 số ở góc dưới màn hình.")
+        print("Nhớ đã bật 'Tủ trưng bày nhân vật' (Character Showcase) cho các nhân vật muốn phân tích.")
+        uid = ""
+        while not uid.strip():
+            uid = input("Nhập UID Genshin của bạn: ").strip()
+        env["GENSHIN_UID"] = uid
 
     _write_env(env)
     print("\nĐã lưu vào .env — lần sau sẽ không hỏi lại.\n")
