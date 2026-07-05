@@ -9,10 +9,13 @@ from genshin_agent.asset_manager import asset_manager
 from genshin_agent import background_collector
 
 def generate_reports(nickname, ar, analysis, plan,
-                     abyss_data=None, promo_codes=None) -> tuple[Path, Path]:
+                     abyss_data=None, theater_data=None, promo_codes=None) -> tuple[Path, Path]:
     """Xuất report.html. Trả tuple (html_path, html_path) để main.py không cần sửa unpack."""
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)))
-    context = _build_context(nickname, ar, analysis, plan, abyss_data, promo_codes)
+    context = _build_context(
+        nickname=nickname, ar=ar, analysis=analysis, plan=plan,
+        abyss_data=abyss_data, theater_data=theater_data, promo_codes=promo_codes,
+    )
     context["background_image_url"] = background_collector.get_random_background_url()
 
     html_template = env.get_template("report.html.j2")
@@ -295,7 +298,7 @@ def _build_promo_codes_context(promo_codes) -> list[dict] | None:
 
 
 def _build_context(nickname, ar, analysis: AccountAnalysis, plan: DailyPlan,
-                   abyss_data=None, promo_codes=None) -> dict:
+                   abyss_data=None, theater_data=None, promo_codes=None) -> dict:
     all_builds = _get_crimsonwitch_builds_safe()
     score_rows = _build_score_rows(analysis.scores, all_builds)
     accordions = _build_guide_accordions(analysis.scores, analysis.guides)
@@ -315,7 +318,9 @@ def _build_context(nickname, ar, analysis: AccountAnalysis, plan: DailyPlan,
         "required_todos":   plan.required_todos,
         "optional_todos":   plan.optional_todos,
         "abyss":            _build_abyss_context(abyss_data),
+        "theater":          _build_theater_context(theater_data),
         "promo_codes":      _build_promo_codes_context(promo_codes),
+        
     }
 
 def _build_guide_url(name_en: str) -> str:
@@ -323,3 +328,58 @@ def _build_guide_url(name_en: str) -> str:
         return ""
     slug = name_en.strip().lower().replace(" ", "_")
     return f"https://genshin-builds.com/vi/character/{slug}"
+
+def _build_theater_context(theater_data) -> dict | None:
+    """theater_data: None hoặc tuple (period_title, list[ActData], list[ActWarning])
+    từ theater_pipeline.get_theater_data() + theater_planner.generate_theater_warnings()."""
+    if theater_data is None:
+        return None
+    period_title, acts, act_warnings = theater_data
+
+    acts_ctx = []
+    for aw in act_warnings:
+        battles_ctx = []
+        for bw in aw.battles:
+            variants_ctx = []
+            for vw in bw.variants:
+                variants_ctx.append({
+                    "variant_index": vw.variant_index,
+                    "target":        vw.target,
+                    "level_raw":     vw.level_raw,
+                    "advantage":     vw.advantage,
+                    "waves": [
+                        [
+                            {
+                                "name":             ew.enemy_name,
+                                "count":            ew.count,
+                                "aura":             ew.aura,
+                                "is_bounty_target": ew.is_bounty_target,
+                                "use":              ew.use,
+                                "avoid":            ew.avoid,
+                                "note":             ew.note,
+                                "unknown":          ew.unknown,
+                            }
+                            for ew in wave
+                        ]
+                        for wave in vw.waves
+                    ],
+                })
+            battles_ctx.append({
+                "battle_name":   bw.battle_name,
+                "stage_effects": bw.stage_effects,
+                "variants":      variants_ctx,
+            })
+        acts_ctx.append({
+            "act_name":    aw.act_name,
+            "description": aw.description,
+            "battles":     battles_ctx,
+        })
+
+    date_match = _PERIOD_DATE_RE.search(period_title)
+    period_label = f"Kỳ bắt đầu {date_match.group(1)}" if date_match else period_title
+
+    return {
+        "period_title": period_title,
+        "period_label": period_label,
+        "acts":          acts_ctx,
+    }

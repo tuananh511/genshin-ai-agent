@@ -31,6 +31,16 @@ probe wikitext trực tiếp (xem PROJECT_MEMORY.md — không suy đoán):
    Act Boss (không có ở Act thường) — mô tả cơ chế/gợi ý hệ khắc chế.
    Template này cũng chứa nested {{Color|...}} nên cần trích bằng đếm
    độ sâu dấu ngoặc, không dùng regex non-greedy đơn giản.
+6. Enemy field có 2 dạng hậu tố song song (xác nhận qua Season 25, Act 9):
+   - '*N' / '*-' — dạng cũ, số lượng cố định / liên tục.
+   - '{ text = - $ danger = 1 }' — dạng mới hơn, wiki dùng để đánh dấu
+     quái nào là MỤC TIÊU BOUNTY CHÍNH (khớp icon cảnh báo ⚠️ trên trang
+     render, chỉ xuất hiện ở Act kiểu "Defeat as many bounty opponents").
+     Field 'text' đóng vai trò tương đương '*-' cũ; field 'danger=1' ->
+     is_bounty_target=True trên EnemyEntry. 2 dạng có thể lẫn trong cùng
+     1 enemies{N} (VD Act 9: 4 con chính dùng dạng mới, 4 con phụ/whelp
+     dùng dạng cũ) — _parse_enemy_field() thử dạng mới trước, fallback
+     dạng cũ nếu không match.
 """
 from __future__ import annotations
 
@@ -46,6 +56,20 @@ CATEGORY = "Category:Imaginarium Theater Seasons"
 
 DATE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})")
 BATTLE_HEADER_RE = re.compile(r";Battle\{\{[Cc]olon\}\}\s*(.*?)\n")
+COLOR_TEMPLATE_RE = re.compile(r"\{\{Color\|([^{}]*)\}\}")
+
+
+def _strip_color_templates(text: str) -> str:
+    """Rút {{Color|...}} (wiki markup tô màu/tooltip) thành text hiển thị thuần.
+    Lấy param cuối cùng (đó luôn là phần hiển thị thật, kể cả khi chỉ có 1 param
+    như {{Color|Pyro}} — param đó vừa là màu vừa là text). Bỏ dấu ngoặc kép bọc
+    ngoài nếu có (vd {{Color|help|"Star Challenge"}}).
+    Không xử lý Color lồng trong Color khác — chưa gặp trường hợp này khi probe
+    dữ liệu thật (season 2026-07), nếu mùa sau xuất hiện sẽ cần xử lý đệ quy."""
+    def _repl(m: re.Match) -> str:
+        value = m.group(1).split("|")[-1].strip()
+        return value.strip('"')
+    return COLOR_TEMPLATE_RE.sub(_repl, text)
 ACT_HEADER_RE = re.compile(r"===\s*((?:Act \d+)|(?:Arcana Challenge [IVX]+))\s*===")
 
 
@@ -62,6 +86,8 @@ class EnemyEntry:
     name: str
     count: int               # -1 nghĩa là '*-' trong wikitext (quái liên tục / không giới hạn)
     aura: str | None = None  # từ hậu tố '/{{Aura|...}}' gắn sau tên quái, None nếu không có
+    is_bounty_target: bool = False  # từ hậu tố '{ text=... $ danger=1 }' — cờ "mục tiêu bounty chính"
+                                     # (VD Act dạng "Defeat as many bounty opponents..."), False nếu không có
 
 
 @dataclass
@@ -263,11 +289,39 @@ def _extract_aura_suffix(s: str) -> tuple[str, str | None]:
     return s, None
 
 
+def _extract_danger_suffix(enemy_str: str) -> tuple[str, int | None, bool]:
+    """Tách hậu tố dạng '{ text = - $ danger = 1 }' sau tên quái — cú pháp mới,
+    khác hẳn '*N'/'*-' cũ, wiki dùng để đánh dấu quái nào là mục tiêu bounty chính
+    (thấy ở Act 9 mùa Season 25, kèm icon cảnh báo trên trang render).
+    Field 'text' đóng vai trò tương đương '*-' cũ (hiển thị số lượng): '-' -> liên tục,
+    số -> count cụ thể. Trả về (tên đã bỏ hậu tố, count suy ra từ 'text' hoặc None nếu
+    không có hậu tố này, is_bounty_target).
+    """
+    m = re.match(r"^(.*?)\{([^{}]*)\}\s*$", enemy_str.strip())
+    if not m:
+        return enemy_str, None, False
+    name = m.group(1).strip()
+    inner = m.group(2)
+    count: int | None = None
+    is_bounty_target = False
+    for part in inner.split("$"):
+        kv = re.match(r"^\s*(\w+)\s*=\s*(.*?)\s*$", part)
+        if not kv:
+            continue
+        key, value = kv.group(1), kv.group(2).strip()
+        if key == "text":
+            count = -1 if value == "-" else (int(value) if value.isdigit() else None)
+        elif key == "danger":
+            is_bounty_target = value == "1"
+    return name, count, is_bounty_target
+
+
 def _parse_enemy_field(raw: str) -> EnemyWave:
     """
     ';' = nhiều loại quái cùng 1 wave. '//' = nhiều wave nối tiếp.
     '*N' sau tên = số lượng. '*-' = không giới hạn/liên tục -> lưu count=-1.
     '/{{Aura|...}}' sau '*N' = quái đó có sẵn aura đặc biệt -> tách riêng field aura.
+    '{ text=... $ danger=... }' sau tên = cú pháp mới thay cho '*N', xem _extract_danger_suffix.
     """
     ew = EnemyWave()
     if not raw:
@@ -282,13 +336,17 @@ def _parse_enemy_field(raw: str) -> EnemyWave:
             if not enemy_str:
                 continue
             enemy_str, aura = _extract_aura_suffix(enemy_str)
-            m = re.match(r"^(.*?)\*(-|\d+)$", enemy_str)
-            if m:
-                name = m.group(1).strip()
-                count = -1 if m.group(2) == "-" else int(m.group(2))
+            enemy_str, danger_count, is_bounty_target = _extract_danger_suffix(enemy_str)
+            if danger_count is not None:
+                name, count = enemy_str, danger_count
             else:
-                name, count = enemy_str, 1
-            wave.append(EnemyEntry(name=name, count=count, aura=aura))
+                m = re.match(r"^(.*?)\*(-|\d+)$", enemy_str)
+                if m:
+                    name = m.group(1).strip()
+                    count = -1 if m.group(2) == "-" else int(m.group(2))
+                else:
+                    name, count = enemy_str, 1
+            wave.append(EnemyEntry(name=name, count=count, aura=aura, is_bounty_target=is_bounty_target))
         if wave:
             ew.waves.append(wave)
     return ew
@@ -302,7 +360,7 @@ def _parse_description(section: str) -> str | None:
     parts = _split_top_level_pipes(inner)
     if len(parts) < 2:
         return None
-    return parts[1].strip()
+    return _strip_color_templates(parts[1].strip())
 
 
 def _parse_stage_effects(block: str) -> list[str]:
@@ -314,7 +372,7 @@ def _parse_stage_effects(block: str) -> list[str]:
     for line in m.group(1).splitlines():
         line = line.strip()
         if line.startswith("**"):
-            effects.append(line.lstrip("*").strip())
+            effects.append(_strip_color_templates(line.lstrip("*").strip()))
     return effects
 
 
@@ -330,9 +388,9 @@ def _parse_domain_enemies_variants(block: str) -> list[BattleVariant]:
     while any(params.get(f"{key}{n}") for key in ("target", "level", "advantage", "enemies")):
         variants.append(
             BattleVariant(
-                target=params.get(f"target{n}") or None,
-                level_raw=params.get(f"level{n}") or None,
-                advantage=params.get(f"advantage{n}") or None,
+                target=_strip_color_templates(params.get(f"target{n}") or "") or None,
+                level_raw=_strip_color_templates(params.get(f"level{n}") or "") or None,
+                advantage=_strip_color_templates(params.get(f"advantage{n}") or "") or None,
                 enemies=_parse_enemy_field(params.get(f"enemies{n}", "")),
             )
         )

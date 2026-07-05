@@ -119,6 +119,39 @@ def format_stats(stats: dict) -> str:
     parts = [f"{FRIENDLY_STAT_LABELS[pid]}={val}" for pid, val in stats.items() if pid in FRIENDLY_STAT_LABELS]
     return ", ".join(parts) if parts else "(không có stat đáng chú ý)"
 
+def _match_weapon_role(weapon_name_vi: str, roles: dict) -> dict:
+    """So khớp vũ khí đang dùng (tên tiếng Việt, từ s.weapon_name) với vũ khí trong
+    TẤT CẢ role của guide — code thuần, để tránh lặp lại bug cũ (LLM tự đối chiếu
+    gây sai vặt không nhất quán, xem PROJECT_MEMORY.md mục Nhóm C)."""
+    matches = []
+    for role_name, role_data in roles.items():
+        for w in role_data.get("weapons", []):
+            if asset_manager.translate_weapon_name_en(w["name"]).strip().lower() == weapon_name_vi.strip().lower():
+                matches.append(role_name)
+                break
+    return {"matched_roles": matches, "matched_any": bool(matches)}
+
+def _match_artifact_sets_role(artifact_sets: dict[str, int], roles: dict) -> dict:
+    """So khớp set ĐẠT ĐỦ 4 MẢNH (count >= 4) đang mặc với set "(4)" trong guide — code thuần.
+    Build không đạt 4 mảnh ở set nào (combo 2+2, 3+2...) KHÔNG được phán đúng/sai ở đây —
+    guide không ghi rõ set nào được đề xuất ghép cặp với set nào (chỉ liệt kê set đơn lẻ
+    kèm số mảnh), phán thêm sẽ là suy đoán không có nguồn (xem PROJECT_MEMORY.md mục 13)."""
+    full_sets = [name for name, count in artifact_sets.items() if count >= 4]
+    if not full_sets:
+        return {"status": "PARTIAL", "full_sets": [], "matched_roles": {}}
+
+    matched_roles = {}
+    for set_name_vi in full_sets:
+        matched_roles[set_name_vi] = [
+            role_name
+            for role_name, role_data in roles.items()
+            if any(
+                asset_manager.translate_set_label_en(a["name"]).strip().lower() == set_name_vi.strip().lower()
+                and a.get("pieces", "").strip() == "(4)"
+                for a in role_data.get("artifact_sets", [])
+            )
+        ]
+    return {"status": "EVALUATED", "full_sets": full_sets, "matched_roles": matched_roles}
 
 def _build_summary_text(scores: list[CharacterScore], guides: dict) -> str:
     lines = []
@@ -129,25 +162,65 @@ def _build_summary_text(scores: list[CharacterScore], guides: dict) -> str:
         sets_text = ", ".join(f"{name} ({count})" for name, count in s.artifact_sets.items())
 
         guide = guides.get(s.avatar_id) or {}
-        role_data, role_name = None, None
-        if guide.get("roles"):
-            role_name = guide.get("default_role") or next(iter(guide["roles"]), None)
-            role_data = guide["roles"].get(role_name)
+        roles = guide.get("roles") or {}
+        default_role = guide.get("default_role")
 
-        if role_data:
-            top_weapons = ", ".join(
-                asset_manager.translate_weapon_name_en(w["name"]) for w in role_data.get("weapons", [])[:5]
-            )
-            top_sets = ", ".join(
-                asset_manager.translate_set_label_en(
-                    f"{a['name']} ({a['pieces']})" if a.get("pieces") else a["name"]
+        if roles:
+            blocks = []
+            for role_name, role_data in roles.items():
+                top_weapons = ", ".join(
+                    asset_manager.translate_weapon_name_en(w["name"]) for w in role_data.get("weapons", [])[:5]
                 )
-                for a in role_data.get("artifact_sets", [])[:3]
-            )
-            guide_text = (
-                f"\n  Guide đề xuất (role: {role_name}) vũ khí (cao→thấp): {top_weapons}"
-                f"\n  Guide đề xuất (role: {role_name}) set (cao→thấp): {top_sets}"
-            )
+                top_sets = ", ".join(
+                    asset_manager.translate_set_label_en(
+                        f"{a['name']} ({a['pieces']})" if a.get("pieces") else a["name"]
+                    )
+                    for a in role_data.get("artifact_sets", [])[:3]
+                )
+                tag = " [role mặc định/phổ biến nhất]" if role_name == default_role else " [role khác, vẫn hợp lệ theo guide]"
+                blocks.append(
+                    f"\n  Guide đề xuất (role: {role_name}{tag}) vũ khí (cao→thấp): {top_weapons}"
+                    f"\n  Guide đề xuất (role: {role_name}{tag}) set (cao→thấp): {top_sets}"
+                )
+            guide_text = "".join(blocks)
+
+            # MỚI: so khớp vũ khí bằng code thuần, kết luận sẵn — LLM không tự đối chiếu nữa
+            verdict = _match_weapon_role(s.weapon_name, roles)
+            if verdict["matched_any"] and default_role in verdict["matched_roles"]:
+                weapon_status = "KHÔNG có vấn đề — vũ khí đang dùng khớp đúng role mặc định."
+            elif verdict["matched_any"]:
+                other = ", ".join(verdict["matched_roles"])
+                weapon_status = (
+                    f"KHÔNG phải vấn đề — vũ khí đang dùng khớp role khác hợp lệ ({other}), "
+                    f"không khớp role mặc định ({default_role}). Chỉ cần 1 câu gợi ý ngắn nếu muốn đổi hướng."
+                )
+            else:
+                weapon_status = "CÓ VẤN ĐỀ THẬT — vũ khí đang dùng không khớp bất kỳ role nào trong guide."
+            guide_text += f"\n  Kết luận vũ khí (đã xác định sẵn, không tự đối chiếu lại): {weapon_status}"
+
+            set_verdict = _match_artifact_sets_role(s.artifact_sets, roles)
+            if set_verdict["status"] == "PARTIAL":
+                worn = ", ".join(f"{n} ({c})" for n, c in s.artifact_sets.items())
+                set_status = (
+                    f"Không đạt đủ 4 mảnh ở set nào (đang mặc: {worn}) — guide không ghi rõ set nào "
+                    f"được đề xuất ghép cặp 2 mảnh, không có dữ liệu để phán đúng/sai, chỉ nêu khách quan."
+                )
+            else:
+                matched_default = [n for n in set_verdict["full_sets"] if default_role in set_verdict["matched_roles"].get(n, [])]
+                matched_other = [n for n in set_verdict["full_sets"] if set_verdict["matched_roles"].get(n) and n not in matched_default]
+                not_matched = [n for n in set_verdict["full_sets"] if not set_verdict["matched_roles"].get(n)]
+                parts = []
+                if matched_default:
+                    parts.append(f"KHÔNG có vấn đề — bộ {', '.join(matched_default)} (4 mảnh) khớp đúng role mặc định.")
+                if matched_other:
+                    parts.append(
+                        f"KHÔNG phải vấn đề — bộ {', '.join(matched_other)} (4 mảnh) khớp role khác hợp lệ, "
+                        f"không khớp role mặc định ({default_role}). Chỉ cần 1 câu gợi ý ngắn nếu muốn đổi hướng."
+                    )
+                if not_matched:
+                    parts.append(f"CÓ VẤN ĐỀ THẬT — bộ {', '.join(not_matched)} (4 mảnh) không khớp bất kỳ role nào trong guide.")
+                set_status = " ".join(parts)
+            guide_text += f"\n  Kết luận set (đã xác định sẵn, không tự đối chiếu lại): {set_status}"
         else:
             guide_text = "\n  (Không có dữ liệu guide cho nhân vật này)"
 
@@ -157,7 +230,6 @@ def _build_summary_text(scores: list[CharacterScore], guides: dict) -> str:
             f"  Vấn đề: {issue_text}{guide_text}"
         )
     return "\n".join(lines)
-
 
 def analyze_account(characters: list[Character], update_guides: bool = False) -> AccountAnalysis:
     scores = [score_character(char) for char in characters]
@@ -179,7 +251,11 @@ QUY TẮC BẮT BUỘC:
 - Nếu vũ khí/set hiện ra là "(chưa rõ tên)" hoặc chứa "(chưa rõ tên", bỏ qua việc đối chiếu phần đó, không suy đoán tên thật.
 - Không nhắc tên nguồn dữ liệu cụ thể.
 - Định dạng: mỗi dòng là 1 gạch đầu dòng "-". KHÔNG dùng heading "##". KHÔNG đóng khung số lượng cố định (không viết kiểu "3 việc nên làm trước").
-- Chỉ liệt kê nhân vật THỰC SỰ có vấn đề: vũ khí/set đang dùng không nằm trong nhóm đề xuất hàng đầu của guide, hoặc chưa có dữ liệu để đối chiếu, hoặc có talent thấp đáng chú ý. Bỏ qua nhân vật đã ổn — không cố liệt kê cho đủ số lượng.
+- Dòng "Kết luận set" trong dữ liệu mỗi nhân vật đã cho sẵn kết quả đối chiếu set — chỉ diễn đạt lại bằng tiếng Việt tự nhiên theo đúng nội dung đó, KHÔNG tự đối chiếu lại set với guide.
+- Nếu "Kết luận set" bắt đầu bằng "Không đạt đủ 4 mảnh" (trường hợp không có dữ liệu để phán đúng/sai): KHÔNG coi đây là vấn đề thật, không dùng làm lý do liệt kê nhân vật vào danh sách — chỉ nêu khách quan set/mảnh đang mặc (không phán tốt/xấu) nếu nhân vật đã có vấn đề khác cần liệt kê.
+- Nếu "Kết luận set" bắt đầu bằng "KHÔNG phải vấn đề" (khớp role khác): áp dụng đúng quy tắc bắt buộc thêm 1 câu ngắn giống rule đã có cho vũ khí.
+- # MỚI: Nếu "Kết luận vũ khí" bắt đầu bằng "KHÔNG phải vấn đề" (khớp role khác, không phải role mặc định), nhân vật đó BẮT BUỘC phải có thêm đúng 1 câu ngắn nhắc việc này (VD "đang build theo hướng khác [role], có thể đổi sang [role mặc định] nếu muốn phổ biến hơn") — kể cả khi nhân vật đã có sẵn vấn đề khác (set/talent) trong dòng. KHÔNG được bỏ câu này vì lý do súc tích hoặc vì đây "không phải vấn đề thật" — đây là thông tin bắt buộc hiển thị, tách biệt với khái niệm "vấn đề".
+- Chỉ liệt kê nhân vật THỰC SỰ có vấn đề: vũ khí/set đang dùng không nằm trong nhóm đề xuất hàng đầu của guide, hoặc chưa có dữ liệu để đối chiếu, hoặc có talent thấp đáng chú ý, hoặc có "Kết luận vũ khí" thuộc case nêu ở rule trên. Bỏ qua nhân vật đã ổn (mọi mặt đều "KHÔNG có vấn đề") — không cố liệt kê cho đủ số lượng.
 - Mỗi dòng: tên nhân vật + vấn đề cụ thể + đề xuất nên farm/làm gì, viết liền trong 1-2 câu.
 
 Toàn bộ 12 nhân vật cần xem xét (đã sắp theo mức độ vấn đề giảm dần):

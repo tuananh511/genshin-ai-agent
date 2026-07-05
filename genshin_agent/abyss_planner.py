@@ -16,6 +16,123 @@ from genshin_agent.abyss_collector import FloorData
 # Chỉ hardcode những enemy đã xác nhận chắc chắn.
 # ---------------------------------------------------------------------------
 ENEMY_DATA: dict[str, dict] = {
+
+    # --- Theater-specific: Hilichurl/Mitachurl shield theo màu (đã xác nhận qua Fandom) ---
+    "Rock Shieldwall Mitachurl": {
+        "use": ["Geo"], "avoid": [],
+        "note": "Khiên Geo — vũ khí nặng (Claymore) hoặc phản ứng Overload (Pyro+Electro) cũng phá hiệu quả. Nhắm mặt sau khi phá khiên."
+    },
+    "Rock Shield Hilichurl Guard": {
+        "use": ["Geo"], "avoid": [],
+        "note": "Khiên Geo cùng họ với Rock Shieldwall Mitachurl — vũ khí nặng hoặc Geo để phá."
+    },
+
+    # --- Nobushi / Kairagi (Inazuma) — KHÔNG có khiên nguyên tố, chỉ tự chuyển
+    # tạm sang sát thương nguyên tố khi tấn công (đã xác nhận qua Fandom) ---
+    "Nobushi: Kikouban": {"use": [], "avoid": [], "note": "Không có khiên nguyên tố — DPS tự do, chỉ né đòn."},
+    "Nobushi: Hitsukeban": {"use": [], "avoid": [], "note": "Không có khiên nguyên tố — DPS tự do, chỉ né đòn."},
+    "Nobushi: Jintouban": {"use": [], "avoid": [], "note": "Không có khiên nguyên tố — DPS tự do, chỉ né đòn."},
+    "Kairagi: Dancing Thunder": {
+        "use": [], "avoid": [],
+        "note": "Không có khiên. Đi theo cặp: nếu 1 con chết trước, con còn lại vào trạng thái cuồng nộ (hồi máu + miễn Đóng Băng/hoá đá) — nên hạ cả 2 gần cùng lúc."
+    },
+    "Kairagi: Fiery Might": {
+        "use": [], "avoid": [],
+        "note": "Không có khiên. Đi theo cặp: nếu 1 con chết trước, con còn lại vào trạng thái cuồng nộ (hồi máu + miễn Đóng Băng/hoá đá) — nên hạ cả 2 gần cùng lúc."
+    },
+
+    # --- Treasure Hoarders — ném thuốc nguyên tố tầm xa, không có khiên (Fandom xác nhận) ---
+    "Treasure Hoarders: Crusher": {"use": [], "avoid": [], "note": "Không có khiên — lính cận chiến thường, DPS tự do."},
+    "Treasure Hoarders: Pyro Potioneer": {"use": [], "avoid": [], "note": "Không có khiên — chỉ ném thuốc Pyro tầm xa, né đòn là chính."},
+    "Treasure Hoarders: Cryo Potioneer": {"use": [], "avoid": [], "note": "Không có khiên — chỉ ném thuốc Cryo tầm xa, né đòn là chính."},
+    "Treasure Hoarders: Hydro Potioneer": {"use": [], "avoid": [], "note": "Không có khiên — chỉ ném thuốc Hydro tầm xa, né đòn là chính."},
+    "Treasure Hoarders: Electro Potioneer": {"use": [], "avoid": [], "note": "Không có khiên — chỉ ném thuốc Electro tầm xa, né đòn là chính."},
+
+    # --- Eremite elite (Sumeru desert) — không có khiên, có "Infused Form" tự buff
+    # tạm thời, đánh liên tục để ngắt (Fandom xác nhận) ---
+    "Eremite Stone Enchanter": {"use": [], "avoid": [], "note": "Không có khiên — có 'Infused Form' Geo tự buff tạm thời, đánh liên tục để ngắt sẽ làm nó yếu đi."},
+    "Eremite Desert Clearwater": {"use": [], "avoid": [], "note": "Không có khiên — có 'Infused Form' Hydro tự buff tạm thời, đánh liên tục để ngắt sẽ làm nó yếu đi."},
+    "Eremite Scorching Loremaster": {"use": [], "avoid": [], "note": "Không có khiên — có 'Infused Form' Pyro tự buff tạm thời, đánh liên tục để ngắt sẽ làm nó yếu đi."},
+    "Eremite Daythunder": {"use": [], "avoid": [], "note": "Không có khiên — có 'Infused Form' Electro tự buff tạm thời, đánh liên tục để ngắt sẽ làm nó yếu đi."},
+
+    # --- Ruin-series còn thiếu (mirror Ruin Guard/Grader đã có — cùng họ máy, không có shield) ---
+    "Ruin Destroyer": {"use": [], "avoid": [], "note": "Không có shield element — DPS tự do (cùng họ máy Ruin)."},
+    "Ruin Scout":      {"use": [], "avoid": [], "note": "Không có shield element — DPS tự do (cùng họ máy Ruin)."},
+    "Ruin Defender":   {"use": [], "avoid": [], "note": "Không có shield element — DPS tự do (cùng họ máy Ruin)."},
+    "Ruin Cruiser":    {"use": [], "avoid": [], "note": "Không có shield element — DPS tự do (cùng họ máy Ruin)."},
+
+    # --- Primal Construct (Sumeru desert automaton) — chủ yếu Vật Lý, không có khiên ---
+    "Primal Construct: Repulsor":  {"use": [], "avoid": [], "note": "Chủ yếu gây sát thương Vật Lý, không có khiên nguyên tố — DPS tự do."},
+    "Primal Construct: Reshaper":  {"use": [], "avoid": [], "note": "Chủ yếu gây sát thương Vật Lý, không có khiên nguyên tố — DPS tự do."},
+    "Primal Construct: Prospector":{"use": [], "avoid": [], "note": "Chủ yếu gây sát thương Vật Lý, không có khiên nguyên tố — DPS tự do."},
+
+    # --- Natlan Saurian (thú Natlan) — không có khiên, tự đánh bằng nguyên tố riêng của loài.
+    # Chỉ 3 loài xác nhận được nguyên tố cụ thể qua Fandom, còn lại xác nhận được
+    # "không có khiên" (đặc điểm chung cả nhóm) nhưng CHƯA xác nhận nguyên tố chính xác. ---
+    "Tatankasaurus": {"use": [], "avoid": [], "note": "Không có khiên — tự gây sát thương Electro tầm gần khi húc/lao, né đòn là chính."},
+    "Tatankasaurus Warrior: Skybreaker":        {"use": [], "avoid": [], "note": "Cùng họ Tatankasaurus — không có khiên, né đòn là chính."},
+    "Tatankasaurus Warrior: Spiritlight Chaser":{"use": [], "avoid": [], "note": "Cùng họ Tatankasaurus — không có khiên, né đòn là chính."},
+    "Qucusaurus": {"use": [], "avoid": [], "note": "Không có khiên — tự gây sát thương Pyro tầm xa/gần khi bay, né đòn là chính."},
+    "Qucusaurus Warrior: Heartstar Hammer": {"use": [], "avoid": [], "note": "Cùng họ Qucusaurus — không có khiên, né đòn là chính."},
+    "Qucusaurus Warrior: Blazing Sky":      {"use": [], "avoid": [], "note": "Cùng họ Qucusaurus — không có khiên, né đòn là chính."},
+    "Qucusaurus Chick": {"use": [], "avoid": [], "note": "Bản non của Qucusaurus — không có khiên, HP thấp hơn."},
+    "Iktomisaurus": {"use": [], "avoid": [], "note": "Không có khiên — tự gây sát thương Cryo tầm xa, né đòn là chính."},
+    "Iktomisaurus Chick": {"use": [], "avoid": [], "note": "Bản non của Iktomisaurus — không có khiên, HP thấp hơn."},
+    "Yumkasaur Whelp":  {"use": [], "avoid": [], "note": "Thú non Natlan — không có khiên nguyên tố (nguyên tố tấn công cụ thể chưa xác minh được)."},
+    "Tepetlisaur Whelp":{"use": [], "avoid": [], "note": "Thú non Natlan — không có khiên nguyên tố (nguyên tố tấn công cụ thể chưa xác minh được)."},
+
+    # --- Black Serpents (Chasm/Khaenri'ah) — KHÔNG dùng Shield khi đánh nhóm này,
+    # đòn trúng nhân vật có Shield sẽ cho chúng buff (Fandom xác nhận rõ) ---
+    "Black Serpent Knight: Rockbreaker Ax": {
+        "use": [], "avoid": [],
+        "note": "⚠️ TRÁNH dùng Shield khi giao tranh — đòn trúng nhân vật có Shield sẽ cho chúng buff (tự trừ %HP để buff). Không có khiên nguyên tố cần phá."
+    },
+    "Shadowy Husk: Standard Bearer": {
+        "use": [], "avoid": [],
+        "note": "⚠️ TRÁNH dùng Shield khi giao tranh — đòn trúng nhân vật có Shield sẽ cho chúng buff. Bản thân nó tạo khiên Pyro cho đồng minh gần đó khi đánh trúng người có Shield."
+    },
+    "Shadowy Husk: Line Breaker": {
+        "use": [], "avoid": [],
+        "note": "⚠️ TRÁNH dùng Shield khi giao tranh — đòn trúng nhân vật có Shield sẽ cho chúng buff (hồi máu đồng minh gần đó)."
+    },
+    "Shadowy Husk: Defender": {
+        "use": [], "avoid": [],
+        "note": "⚠️ TRÁNH dùng Shield khi giao tranh — đòn trúng nhân vật có Shield sẽ cho chúng buff. Bản thân nó có khiên chắn phía trước, đánh vòng sau/bên hông."
+    },
+
+    # --- Xuanwen Beast — dùng element nào cũng như nhau (Fandom + GameWith xác nhận) ---
+    "Xuanwen Beast": {"use": [], "avoid": [], "note": "Không có khiên/né nguyên tố — dùng element nào cũng hiệu quả như nhau, dù bản thân nó đánh bằng Anemo."},
+
+    # --- Hydro Phantasm bản thường — cùng họ Veteran đã có, mirror cùng cơ chế ---
+    "Tainted Water-Spouting Phantasm": {
+        "use": ["Pyro", "Electro"], "avoid": ["Hydro"],
+        "note": "Hydro phantom — không thể Freeze. Luôn nhận Vaporize nếu bị Pyro. (Cùng cơ chế Veteran Tainted Water-Splitting Phantasm, chỉ khác rank.)"
+    },
+    "Tainted Water-Splitting Phantasm": {
+        "use": ["Pyro", "Electro"], "avoid": ["Hydro"],
+        "note": "Hydro phantom — không thể Freeze. Luôn nhận Vaporize nếu bị Pyro. (Cùng cơ chế Veteran Tainted Water-Splitting Phantasm, chỉ khác rank.)"
+    },
+
+    # --- Whopperflower — nổ diện rộng theo nguyên tố bản thân, không có khiên ---
+    "Cryo Whopperflower":   {"use": [], "avoid": [], "note": "Không có khiên — nổ diện rộng gây Cryo khi hết trụ, né ra xa. DPS tự do."},
+    "Electro Whopperflower":{"use": [], "avoid": [], "note": "Không có khiên — nổ diện rộng gây Electro khi hết trụ, né ra xa. DPS tự do."},
+
+    # --- Boss theo Act, cơ chế lấy trực tiếp từ act.description (đã scrape) —
+    # thêm entry để badge enemy không hiện "chưa có dữ liệu" dù thật ra có mô tả rồi ---
+    "Jadeplume Terrorshroom": {
+        "use": ["Electro"], "avoid": [],
+        "note": "Electro đẩy nhanh vào trạng thái Activated/kiệt sức. Pyro sẽ đốt Burning khiến nó sinh nấm con để chạy trốn — không nên spam Pyro liên tục. Xem mô tả Act phía trên để rõ cơ chế đầy đủ."
+    },
+    "Aeonblight Drake": {
+        "use": [], "avoid": [],
+        "note": "Không có khiên cố định — tấn công các lõi (core) lộ ra theo chu kỳ để làm tê liệt và xoá kháng nguyên tố tích luỹ. Xem mô tả Act phía trên."
+    },
+    "Super-Heavy Landrover: Mechanized Fortress": {
+        "use": ["Pyro"], "avoid": [],
+        "note": "Pyro làm nó tích nhiệt vào Overheating; nếu tiếp tục sẽ tự kích Cryo Ward hạ nhiệt — ngắt quá trình hạ nhiệt gây rối loạn hoạt động. Xem mô tả Act phía trên."
+    },
+
+
     # --- Domain Keeper (v6.5, Automaton Asmoday) ---
     # Cơ chế đặc biệt: track số lần nhận Pyro/Hydro/Electro/Cryo → chuyển hình
     # dùng 1 element duy nhất để không kích hoạt biến hình không mong muốn

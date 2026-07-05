@@ -32,23 +32,39 @@ def main():
     print("[4/5] Lập kế hoạch hôm nay...")
     plan = make_resin_plan(analysis)
 
-    # ── Abyss Planner (tuỳ chọn) ──────────────────────────────────────────────
-    abyss_data = None  # None nếu người dùng bỏ qua hoặc lỗi. Nếu có: (period_title, floors, warnings)
-    want_abyss = input("Xem cảnh báo enemy cho Spiral Abyss mùa này? (Y/N): ").strip().lower() == "y"
-    if want_abyss:
+    # ── Event Coaching: Spiral Abyss + Imaginarium Theater (gộp 1 câu hỏi) ──────
+    abyss_data = None    # None nếu bỏ qua/lỗi. Nếu có: (period_title, floors, warnings)
+    theater_data = None  # None — pipeline/planner cho Theater chưa nối (chỉ có collector), để sau
+    want_coach = input("Coach Spiral Abyss + Nhà Hát mùa này? (Y/N): ").strip().lower() == "y"
+    if want_coach:
         try:
             from genshin_agent.llm_client import safe_llm_call
             from genshin_agent.abyss_pipeline import get_abyss_data
             from genshin_agent.abyss_planner import generate_warnings
 
-            update_abyss = input("Cập nhật dữ liệu Abyss mới nhất? (Y/N): ").strip().lower() == "y"
-            print("[Abyss] Thu thập dữ liệu Spiral Abyss...")
-            period_title, floors = get_abyss_data(llm_call=safe_llm_call, force_refresh=update_abyss)
+            print("[Abyss] Thu thập dữ liệu Spiral Abyss (auto update)...")
+            period_title, floors = get_abyss_data(llm_call=safe_llm_call, force_refresh=True)
             warnings = generate_warnings(floors)
             abyss_data = (period_title, floors, warnings)
         except Exception as e:
             print(f"  [warn] Abyss Planner gặp lỗi, bỏ qua: {e}")
             abyss_data = None
+
+        try:
+            from genshin_agent.theater_pipeline import get_theater_data
+            from genshin_agent.theater_planner import generate_theater_warnings
+            from genshin_agent.theater_collector import TheaterDataError
+
+            print("[Theater] Thu thập dữ liệu Nhà Hát (auto update)...")
+            theater_period, acts = get_theater_data(force_refresh=True)
+            theater_warnings = generate_theater_warnings(acts)
+            theater_data = (theater_period, acts, theater_warnings)
+        except TheaterDataError as e:
+            print(f"  [warn] Nhà Hát: {e}")
+            theater_data = None
+        except Exception as e:
+            print(f"  [warn] Theater Planner gặp lỗi, bỏ qua: {e}")
+            theater_data = None
     # ──────────────────────────────────────────────────────────────────────────
 
     # ── Gift Codes (tuỳ chọn) ──────────────────────────────────────────────────
@@ -70,8 +86,9 @@ def main():
         ar=snapshot.adventure_rank,
         analysis=analysis,
         plan=plan,
-        abyss_data=abyss_data,     # None nếu người dùng bỏ qua hoặc lỗi
-        promo_codes=promo_codes,   # None nếu người dùng bỏ qua hoặc lỗi
+        abyss_data=abyss_data,       # None nếu người dùng bỏ qua hoặc lỗi
+        theater_data=theater_data,   # None nếu người dùng bỏ qua/lỗi/mùa chưa có data
+        promo_codes=promo_codes,     # None nếu người dùng bỏ qua hoặc lỗi
     )
 
     print(f"\nHoàn tất! Xem report tại:\n  - {html_path}")

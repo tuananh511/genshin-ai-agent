@@ -150,6 +150,22 @@
   filter: grayscale(60%);
 }
 
+/* ── Tabs (CSS-only) ── */
+  .tabs-group { margin-top: 30px; }
+  .tabs-nav { display: flex; gap: 6px; border-bottom: 2px solid var(--border-muted); flex-wrap: wrap; }
+  .tabs-nav label { padding: 10px 18px; cursor: pointer; color: var(--muted); font-weight: 600; border-bottom: 3px solid transparent; transition: color .15s, border-color .15s; }
+  .tabs-nav label:hover { color: var(--text); }
+  .tab-panel { display: none; padding-top: 16px; }
+  .tab-panel h2:first-child { margin-top: 0; }
+
+  #tab-todo:checked ~ .tabs-nav label[for="tab-todo"],
+  #tab-coach:checked ~ .tabs-nav label[for="tab-coach"],
+  #tab-gifts:checked ~ .tabs-nav label[for="tab-gifts"] { color: var(--gold); border-color: var(--gold); }
+
+  #tab-todo:checked ~ #panel-todo,
+  #tab-coach:checked ~ #panel-coach,
+  #tab-gifts:checked ~ #panel-gifts { display: block; }
+
   /* ── Theme toggle bubble ── */
   #theme-toggle {
     position: fixed; bottom: 24px; right: 24px; z-index: 100;
@@ -245,135 +261,197 @@
 <h2>🔍 Phân tích từ AI</h2>
 <div class="card">{{ llm_advice_html | safe }}</div>
 
-<h2>🎯 Domain nên farm hôm nay — {{ day_of_week }}</h2>
-{% for todo in required_todos %}
-<div class="todo">
-  <strong>{{ todo.label }}</strong><br>
-  <span class="reason">💡 {{ todo.reason }}</span>
-</div>
-{% endfor %}
+<div class="tabs-group">
+  <input type="radio" name="main-tabs" id="tab-todo" checked hidden>
+  <input type="radio" name="main-tabs" id="tab-coach" hidden>
+  <input type="radio" name="main-tabs" id="tab-gifts" hidden>
 
-<h2>📝 Nhắc nhở thêm <span style="font-size:0.6em;color:#888;">(tuỳ chọn — không liên quan farm)</span></h2>
-{% for todo in optional_todos %}
-<div class="todo" style="opacity:0.8;">
-  {% if todo.icon_url %}
-  <span class="item-tip"><strong>{{ todo.label }}</strong><img class="tip-img" src="{{ todo.icon_url }}" alt=""></span>
-  {% else %}
-  <strong>{{ todo.label }}</strong>
-  {% endif %}
-  {% if todo.url %} — <a href="{{ todo.url }}" target="_blank" rel="noopener">Mở link ↗</a>{% endif %}<br>
-  <span class="reason">💡 {{ todo.reason }}</span>
-</div>
-{% endfor %}
+  <div class="tabs-nav">
+    <label for="tab-todo">🎯 To Do</label>
+    <label for="tab-coach">🌀 Coach Sự Kiện</label>
+    <label for="tab-gifts">🎁 Gift Codes</label>
+  </div>
 
-{% if abyss %}
-<h2>🌀 Spiral Abyss — {{ abyss.period_label }}</h2>
+  <div class="tab-panel" id="panel-todo">
+    <h2>🎯 Domain nên farm hôm nay — {{ day_of_week }}</h2>
+    {% for todo in required_todos %}
+    <div class="todo">
+      <strong>{{ todo.label }}</strong><br>
+      <span class="reason">💡 {{ todo.reason }}</span>
+    </div>
+    {% endfor %}
 
-<div class="abyss-floors">
-  {% for floor in abyss.floors %}
-  <div class="abyss-floor">
-    <h4>Floor {{ floor.floor_number }}</h4>
-    {% if floor.ley_line_disorder %}
-    <div class="ley">
-      {% for lld in floor.ley_line_disorder %}✦ {{ lld }}<br>{% endfor %}
+    <h2>📝 Nhắc nhở thêm <span style="font-size:0.6em;color:#888;">(tuỳ chọn — không liên quan farm)</span></h2>
+    {% for todo in optional_todos %}
+    <div class="todo" style="opacity:0.8;">
+      {% if todo.icon_url %}
+      <span class="item-tip"><strong>{{ todo.label }}</strong><img class="tip-img" src="{{ todo.icon_url }}" alt=""></span>
+      {% else %}
+      <strong>{{ todo.label }}</strong>
+      {% endif %}
+      {% if todo.url %} — <a href="{{ todo.url }}" target="_blank" rel="noopener">Mở link ↗</a>{% endif %}<br>
+      <span class="reason">💡 {{ todo.reason }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="tab-panel" id="panel-coach">
+    {% if abyss %}
+    <h2>🌀 Spiral Abyss — {{ abyss.period_label }}</h2>
+    <div class="abyss-floors">
+      {% for floor in abyss.floors %}
+      <div class="abyss-floor">
+        <h4>Floor {{ floor.floor_number }}</h4>
+        {% if floor.ley_line_disorder %}
+        <div class="ley">
+          {% for lld in floor.ley_line_disorder %}✦ {{ lld }}<br>{% endfor %}
+        </div>
+        {% endif %}
+        {% for ch in floor.chambers %}
+        <div class="abyss-chamber">
+          <span class="ch-label">Chamber {{ ch.chamber_index }}</span>
+          <span style="color:#888;"> Lv.{{ ch.level }} — {{ ch.target }}</span>
+          {% if ch.note_vi %}
+          <div class="abyss-note">📝 {{ ch.note_vi | replace("\n", "<br>") }}</div>
+          {% endif %}
+          {% for hw in ch.halves %}
+          <div class="half-block">
+            <span class="half-label">Nửa {{ 'đầu' if hw.half == 1 else 'sau' }}:</span>
+            {% for ew in hw.enemies %}
+            <div class="abyss-enemy">
+              <span class="enemy-name">{{ ew.name }} ×{{ ew.count }}</span>
+              {% if ew.unknown %}
+              <span class="badge badge-unknown">chưa có dữ liệu về quái này</span>
+              {% else %}
+                {% if ew.use %}<span class="badge badge-use">dùng {{ ew.use | join('/') }}</span>{% endif %}
+                {% if ew.avoid %}<span class="badge badge-avoid">tránh {{ ew.avoid | join('/') }}</span>{% endif %}
+                {% if not ew.use and not ew.avoid and not ew.note %}<span class="badge badge-ok">không cảnh báo đặc biệt</span>{% endif %}
+                {% if ew.note %}<span class="enemy-note">{{ ew.note }}</span>{% endif %}
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
     {% endif %}
-    {% for ch in floor.chambers %}
-    <div class="abyss-chamber">
-      <span class="ch-label">Chamber {{ ch.chamber_index }}</span>
-      <span style="color:#888;"> Lv.{{ ch.level }} — {{ ch.target }}</span>
-      {% if ch.note_vi %}
-      <div class="abyss-note">📝 {{ ch.note_vi | replace("\n", "<br>") }}</div>
-      {% endif %}
-      {% for hw in ch.halves %}
-      <div class="half-block">
-        <span class="half-label">Nửa {{ 'đầu' if hw.half == 1 else 'sau' }}:</span>
-        {% for ew in hw.enemies %}
-        <div class="abyss-enemy">
-          <span class="enemy-name">{{ ew.name }} ×{{ ew.count }}</span>
-          {% if ew.unknown %}
-          <span class="badge badge-unknown">chưa có dữ liệu về quái này</span>
-          {% else %}
-            {% if ew.use %}<span class="badge badge-use">dùng {{ ew.use | join('/') }}</span>{% endif %}
-            {% if ew.avoid %}<span class="badge badge-avoid">tránh {{ ew.avoid | join('/') }}</span>{% endif %}
-            {% if not ew.use and not ew.avoid and not ew.note %}<span class="badge badge-ok">không cảnh báo đặc biệt</span>{% endif %}
-            {% if ew.note %}<span class="enemy-note">{{ ew.note }}</span>{% endif %}
-          {% endif %}
+
+    {% if theater %}
+    <h2>🎭 Imaginarium Theater — {{ theater.period_label }}</h2>
+    {% for act in theater.acts %}
+    <div class="abyss-floor">
+      <h4>{{ act.act_name }}</h4>
+      {% if act.description %}<div class="ley">✦ {{ act.description }}</div>{% endif %}
+      {% for battle in act.battles %}
+      <div class="abyss-chamber">
+        {% if battle.battle_name %}<span class="ch-label">{{ battle.battle_name }}</span>{% endif %}
+        {% if battle.stage_effects %}
+        <div class="abyss-note">📝 {{ battle.stage_effects | join(' · ') }}</div>
+        {% endif %}
+        {% for v in battle.variants %}
+        <div class="half-block">
+          <span class="half-label">
+            {% if battle.variants | length > 1 %}Biến thể {{ v.variant_index }} (1 trong các khả năng có thể rơi vào):{% endif %}
+            {% if v.target %}{{ v.target }}{% endif %}
+            {% if v.level_raw %} — Lv.{{ v.level_raw | replace("<br>", " / ") }}{% endif %}
+            {% if v.advantage %} — Lợi thế hệ: {{ v.advantage }}{% endif %}
+          </span>
+          {% for wave in v.waves %}
+          {% for ew in wave %}
+          <div class="abyss-enemy">
+            <span class="enemy-name">{{ ew.name }} ×{{ 'liên tục' if ew.count == -1 else ew.count }}</span>
+            {% if ew.is_bounty_target %}<span class="badge badge-avoid">⚠️ mục tiêu bounty chính</span>{% endif %}
+            {% if ew.aura %}<span class="badge badge-use">aura {{ ew.aura }}</span>{% endif %}
+            {% if ew.unknown %}
+            <span class="badge badge-unknown">chưa có dữ liệu về quái này</span>
+            {% else %}
+              {% if ew.use %}<span class="badge badge-use">dùng {{ ew.use | join('/') }}</span>{% endif %}
+              {% if ew.avoid %}<span class="badge badge-avoid">tránh {{ ew.avoid | join('/') }}</span>{% endif %}
+              {% if not ew.use and not ew.avoid and not ew.note %}<span class="badge badge-ok">không cảnh báo đặc biệt</span>{% endif %}
+              {% if ew.note %}<span class="enemy-note">{{ ew.note }}</span>{% endif %}
+            {% endif %}
+          </div>
+          {% endfor %}
+          {% endfor %}
         </div>
         {% endfor %}
       </div>
       {% endfor %}
     </div>
     {% endfor %}
+    {% endif %}
+
+    {% if not abyss and not theater %}
+    <p style="color: var(--muted);">Chưa coach sự kiện nào — chọn "Y" ở câu hỏi coach khi chạy <code>main.py</code>.</p>
+    {% endif %}
   </div>
-  {% endfor %}
-</div>
-{% endif %}
 
-{% if promo_codes %}
-<h2>🎁 Gift Codes đang active</h2>
-<div class="promo-codes">
-  {% for pc in promo_codes %}
-  <div class="promo-card" data-code="{{ pc.code }}">
-    <span class="promo-code" onclick="markPromoUsed(this, '{{ pc.code }}')" title="Click để copy">{{ pc.code }}</span>
-    <span class="promo-server">{{ pc.server_label }}</span>
-    <div class="promo-expiry">📅 {{ pc.expiry_label }} · phát hiện {{ pc.discovery_date }}</div>
-    {% for r in pc.rewards %}
-    <div class="promo-reward">• {{ r.name }} ×{{ r.count }}</div>
-    {% endfor %}
-    {% if pc.notes %}<div class="promo-notes">{{ pc.notes }}</div>{% endif %}
-  </div>
-  {% endfor %}
-</div>
+  <div class="tab-panel" id="panel-gifts">
+    {% if promo_codes %}
+    <h2>🎁 Gift Codes đang active</h2>
+    <div class="promo-codes">
+      {% for pc in promo_codes %}
+      <div class="promo-card" data-code="{{ pc.code }}">
+        <span class="promo-code" onclick="markPromoUsed(this, '{{ pc.code }}')" title="Click để copy">{{ pc.code }}</span>
+        <span class="promo-server">{{ pc.server_label }}</span>
+        <div class="promo-expiry">📅 {{ pc.expiry_label }} · phát hiện {{ pc.discovery_date }}</div>
+        {% for r in pc.rewards %}
+        <div class="promo-reward">• {{ r.name }} ×{{ r.count }}</div>
+        {% endfor %}
+        {% if pc.notes %}<div class="promo-notes">{{ pc.notes }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
 
-<script>
-(function () {
-  const STORAGE_KEY = "giftCodesUsed";
-  const TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 ngày
+    <script>
+    (function () {
+      const STORAGE_KEY = "giftCodesUsed";
+      const TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 ngày
 
-  function loadUsedMap() {
-    let map = {};
-    try {
-      map = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    } catch (e) {
-      map = {};
-    }
-    const now = Date.now();
-    let changed = false;
-    for (const code in map) {
-      if (now - map[code] > TTL_MS) {
-        delete map[code];
-        changed = true;
+      function loadUsedMap() {
+        let map = {};
+        try { map = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+        catch (e) { map = {}; }
+        const now = Date.now();
+        let changed = false;
+        for (const code in map) {
+          if (now - map[code] > TTL_MS) { delete map[code]; changed = true; }
+        }
+        if (changed) saveUsedMap(map);
+        return map;
       }
-    }
-    if (changed) saveUsedMap(map);
-    return map;
-  }
 
-  function saveUsedMap(map) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
-  }
+      function saveUsedMap(map) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+      }
 
-  function applyUsedClasses(map) {
-    document.querySelectorAll(".promo-card").forEach(function (card) {
-      const code = card.getAttribute("data-code");
-      if (map[code]) card.classList.add("used");
-    });
-  }
+      function applyUsedClasses(map) {
+        document.querySelectorAll(".promo-card").forEach(function (card) {
+          const code = card.getAttribute("data-code");
+          if (map[code]) card.classList.add("used");
+        });
+      }
 
-  window.markPromoUsed = function (el, code) {
-    if (navigator.clipboard) navigator.clipboard.writeText(code);
-    const map = loadUsedMap();
-    map[code] = Date.now();
-    saveUsedMap(map);
-    const card = el.closest(".promo-card");
-    if (card) card.classList.add("used");
-  };
+      window.markPromoUsed = function (el, code) {
+        if (navigator.clipboard) navigator.clipboard.writeText(code);
+        const map = loadUsedMap();
+        map[code] = Date.now();
+        saveUsedMap(map);
+        const card = el.closest(".promo-card");
+        if (card) card.classList.add("used");
+      };
 
-  applyUsedClasses(loadUsedMap());
-})();
-</script>
-{% endif %}
+      applyUsedClasses(loadUsedMap());
+    })();
+    </script>
+    {% else %}
+    <p style="color: var(--muted);">Không có gift code nào — chọn "Y" ở câu hỏi gift code khi chạy <code>main.py</code>.</p>
+    {% endif %}
+  </div>
+</div>
 
 
 <footer style="color: var(--muted); text-align:center; margin-top:60px; font-size:0.85em;">Generated by Genshin AI Agent</footer>

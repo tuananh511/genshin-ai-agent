@@ -12,6 +12,7 @@ __pycache__/
 genshin_agent.db
 abyss_cache.json
 report.html
+theater_cache.json
 
 # OS
 .DS_Store
