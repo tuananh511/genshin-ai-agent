@@ -1,94 +1,52 @@
-# Genshin AI Agent
+# Genshin AI Account Manager
 
-AI Agent (không phải chatbot) hỗ trợ người chơi Genshin Impact — chạy 1 lệnh duy nhất, tự động lấy dữ liệu account thật, đối chiếu build với guide, lập checklist nên farm gì, và xuất report HTML đẹp.
+> **🔧 Trạng thái: tạm dừng phát triển.** Tool chạy ổn định ở phiên bản hiện tại, không có lỗi biết trước, nhưng hiện không được phát triển thêm tính năng mới. Issue/PR vẫn được xem qua nếu có, nhưng phản hồi có thể chậm.
 
-```bash
-uv run main.py
-```
+AI Agent tự động phân tích account Genshin Impact và đề xuất việc nên làm hôm nay — chạy bằng `python main.py`, không phải chatbot hỏi-đáp.
 
 ## Pipeline
 
-```
 Data Collector (Enka API)
-  → AssetManager (tra tên nhân vật/vũ khí/set: Enka loc.json → TextMap VI/EN)
-  → Guide Collector (build guide thật từ genshin-builds.github.io, có cache)
-  → Optimizer (code tính stat + Gemini Flash đối chiếu guide)
-  → Planner (checklist farm — code thuần)
-  → [tuỳ chọn] Event Coaching: Spiral Abyss + Imaginarium Theater (Nhà Hát)
-  → [tuỳ chọn] Gift Codes đang active
-  → Report Generator → report.html
-```
+→ AssetManager (tra tên nhân vật/vũ khí/set: Enka loc.json → TextMap tiếng Việt/Anh)
+→ Guide Collector (build guide thật từ genshin-builds.github.io, cache, cập nhật theo yêu cầu)
+→ Optimizer (code tính stat + Gemini Flash đối chiếu guide, phát hiện cầm sai vũ khí/set)
+→ Planner (checklist farm gì hôm nay)
+→ Report Generator (report.html với Accordion + ảnh hover, report.md cho Github)
 
-**Triết lý**: việc tính được bằng công thức/parse dữ liệu (lịch server, stat, JSON) dùng code thuần. AI chỉ dùng cho việc cần đọc hiểu/diễn giải (đối chiếu build với guide, viết nhận xét). Không bao giờ hallucinate — thiếu dữ liệu thật thì hiển thị rõ `(chưa rõ)`, không tự suy đoán.
+Nguyên tắc: việc tính được bằng công thức (lịch server, parse dữ liệu, tra tên) dùng code thuần. AI chỉ dùng để đọc hiểu/diễn giải (đối chiếu build với guide, viết nhận xét).
 
 ## Tính năng
 
-- Lấy character/weapon/artifact/talent/constellation/level thật từ Enka Network qua UID
-- Tra tên nhân vật/vũ khí/Thánh Di Vật sang tiếng Việt
-- Crawl build guide thật theo từng nhân vật, cache, cập nhật khi cần (hỏi Y/N)
-- Phát hiện đang dùng vũ khí/set khác với guide, gợi ý nên farm gì thay thế
-- Bảng Character Score: ảnh vũ khí/set, badge role + chỉ số khuyến nghị (Stat Recommendations), link thẳng tới trang build guide
-- Checklist farm hôm nay (Required) + nhắc nhở phụ (HoYoLAB check-in, event, transformer, teapot)
-- **Coach Sự Kiện**: cảnh báo counter/tránh element cho Spiral Abyss + Imaginarium Theater theo đúng kỳ hiện tại (hỏi Y/N, tự cập nhật)
-- **Gift Codes**: danh sách code Genshin đang active, click-to-copy, tự đánh dấu code đã dùng
-- Report HTML dark/light theme, 3 tab CSS-only (To Do / Coach Sự Kiện / Gift Codes), background ngẫu nhiên
-- Setup wizard cho người dùng mới (nhập API key + UID lần đầu)
+- Lấy character/weapon/artifact/talent/constellation/level thật từ Enka Network (qua UID)
+- Tra tên nhân vật/vũ khí/Thánh Di Vật sang tiếng Việt qua `AssetManager` (Enka data + TextMap chính thức từ game)
+- Crawl build guide thật từ genshin-builds.github.io cho từng nhân vật trong account — vũ khí/set/chỉ số/kỹ năng xếp theo độ ưu tiên
+- Phát hiện khi đang dùng vũ khí/set KHÁC với đề xuất guide, gợi ý nên farm gì thay thế
+- Report dạng Accordion (1 nhân vật/mục), kèm ảnh hover khi rê chuột vào tên vũ khí/Thánh Di Vật, có link tới guide gốc
+- Checklist farm hôm nay (Required) + nhắc nhở phụ (Optional: HoYoLAB check-in, event, transformer, teapot — đều có link mở tab mới)
+- Xuất `report.html` (dark theme, màu theo hệ nguyên tố) và `report.md` (đọc trên Github)
 
 ## Yêu cầu
 
-- **Python 3.12+** và [uv](https://docs.astral.sh/uv/) (dùng để quản lý dependency + chạy project)
-- 1 Google AI Studio API key — **miễn phí**, lấy tại [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (free tier 1500 request/ngày, không cần thẻ)
+- Python 3.12+, [uv](https://docs.astral.sh/uv/)
+- 1 Google AI Studio API key — **miễn phí**, lấy tại [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (free tier: 1500 request/ngày cho model Flash, không cần thẻ tín dụng)
 - UID Genshin Impact của bạn (xem trong Pause Menu) + đã bật **"Tủ trưng bày nhân vật"**
 
 ## Cài đặt & chạy
 
-```bash
-git clone https://github.com/tuananh511/genshin-ai-agent.git
+```
+git clone <repo-url>
 cd genshin-ai-agent
 uv run main.py
 ```
 
-Lần đầu chạy sẽ hỏi API key + UID. Mỗi lần chạy sẽ hỏi có muốn cập nhật guide build / coach sự kiện / gift codes — chọn N để dùng cache cũ (nhanh), Y khi muốn lấy dữ liệu mới nhất.
-
-## Lỗi thường gặp
-
-### ❌ `'python' is not recognized` / `python: command not found`
-
-Máy bạn chưa cài Python, hoặc đã cài nhưng chưa thêm vào PATH.
-
-1. Tải Python 3.12+ tại [python.org/downloads](https://www.python.org/downloads/)
-2. Khi cài trên **Windows**, nhớ tick vào ô **"Add python.exe to PATH"** ở màn hình đầu tiên của trình cài đặt — đây là nguyên nhân phổ biến nhất khiến lệnh không nhận
-3. Kiểm tra lại bằng cách mở terminal mới (đóng terminal cũ đi, mở lại) và gõ:
-   ```bash
-   python --version
-   ```
-   Nếu ra số phiên bản (VD `Python 3.12.4`) là đã cài đúng.
-
-### ❌ `'uv' is not recognized` / `uv: command not found`
-
-Project dùng `uv` để quản lý dependency thay vì `pip` thông thường, nên cần cài riêng.
-
-1. Cài theo hướng dẫn chính thức tại [docs.astral.sh/uv](https://docs.astral.sh/uv/getting-started/installation/):
-   - **Windows** (PowerShell):
-     ```powershell
-     powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-     ```
-   - **macOS/Linux**:
-     ```bash
-     curl -LsSf https://astral.sh/uv/install.sh | sh
-     ```
-2. Đóng terminal cũ, mở terminal mới để PATH cập nhật
-3. Kiểm tra lại: `uv --version`
-
-> **Lưu ý**: project **không cần cài Node.js** — toàn bộ code là Python thuần (pipeline + Jinja2 template render ra HTML), không có phần nào build bằng JavaScript/npm.
+Lần đầu chạy sẽ hỏi API key + UID (hoặc N để dùng UID demo). Mỗi lần chạy sẽ hỏi **"Cập nhật guide build mới nhất?"** — chọn N để dùng cache cũ (nhanh, không gọi mạng), chọn Y khi muốn crawl lại (ví dụ sau khi game ra bản cập nhật mới).
 
 ## Giới hạn cần biết
 
-- **LLM**: dùng Gemini Flash qua endpoint tương thích OpenAI của Google AI Studio. Nếu model lỗi/quá tải liên tục, tool sẽ hỏi bạn nhập tên model khác và tự lưu lại cho lần sau.
-- **Tra tên item**: một số ít vũ khí/set có hash không khớp bất kỳ nguồn TextMap nào — hiển thị `(chưa rõ tên #hash)`, không suy đoán. Giới hạn dữ liệu cộng đồng đã biết.
+- **LLM**: dùng Gemini Flash qua endpoint tương thích OpenAI của Google AI Studio. Nếu model lỗi/quá tải liên tục, tool sẽ hỏi bạn nhập tên model khác (xem danh sách tại [ai.google.dev/gemini-api/docs/models](https://ai.google.dev/gemini-api/docs/models)) và tự lưu lại cho lần sau.
+- **Tra tên item**: dùng dữ liệu Enka + TextMap chính thức từ game (qua `AssetManager`). Một số ít vũ khí/set (khoảng 10 trong toàn bộ game, đã xác minh kỹ) có hash không khớp với bất kỳ nguồn TextMap nào tìm được — hiển thị `(chưa rõ tên #hash)`, không suy đoán. Đây là giới hạn dữ liệu cộng đồng đã biết, không phải lỗi.
 - **Guide build**: crawl từ genshin-builds.github.io — chỉ hoạt động với nhân vật có trang guide đầy đủ trên đó.
-- **Resin/daily commission**: không lấy được số thật (chỉ dùng Enka — public, không cần đăng nhập; đã từ chối HoYoLAB cookie API vì rủi ro bảo mật cho project chia sẻ công khai).
-- **Gift Codes "đã dùng"**: lưu bằng `localStorage` của trình duyệt — đổi máy/trình duyệt hoặc xoá cache sẽ mất trạng thái đã đánh dấu.
+- **Wish Advisor** (`genshin_agent/wish_advisor.py`): đã viết nhưng **chưa nối vào pipeline chính** — tư vấn chiến lược roll banner cần model mạnh hơn free tier hiện tại để đủ tin cậy. Giữ lại để dễ nối lại sau.
 
 ## Cấu trúc project
 
@@ -97,29 +55,30 @@ genshin-ai-agent/
 ├── main.py
 ├── config.yaml
 ├── genshin_agent/
-│   ├── config.py              # đọc .env + config.yaml
-│   ├── llm_client.py          # get_llm() + safe_llm_call() — tự retry, tự hỏi đổi model
-│   ├── setup_wizard.py        # hỏi API key/UID lần đầu chạy
-│   ├── data_collector.py      # fetch + parse Enka API
-│   ├── database.py            # SQLite save/load
-│   ├── asset_manager.py       # tra tên nhân vật/vũ khí/set (Enka + TextMap VI/EN)
-│   ├── guide_collector.py     # crawl build guide + cache
-│   ├── optimizer.py           # tính stat (code) + đối chiếu guide (AI)
-│   ├── planner.py             # checklist farm hôm nay
-│   ├── abyss_collector.py / abyss_pipeline.py / abyss_planner.py / abyss_note_translator.py / abyss_cache.py
-│   ├── theater_collector.py / theater_pipeline.py / theater_planner.py / theater_cache.py
-│   ├── promo_code_pipeline.py # Gift Codes đang active
-│   └── report_generator.py    # build context + render Jinja2 → report.html
+│   ├── config.py            # đọc .env + config.yaml
+│   ├── llm_client.py        # get_llm() + safe_llm_call() — tự retry, tự hỏi đổi model khi lỗi
+│   ├── setup_wizard.py      # hỏi API key/UID lần đầu chạy
+│   ├── data_collector.py    # fetch + parse Enka API
+│   ├── database.py          # SQLite save/load
+│   ├── asset_manager.py     # tra tên nhân vật/vũ khí/set (Enka data + TextMap VI/EN)
+│   ├── guide_collector.py   # crawl build guide từ genshin-builds.github.io + cache
+│   ├── optimizer.py         # tính stat (code) + đối chiếu guide, phát hiện sai build (AI)
+│   ├── planner.py           # checklist farm hôm nay
+│   ├── wish_advisor.py      # (chưa nối vào main.py — xem Giới hạn)
+│   └── report_generator.py  # xuất report.html/report.md
 ├── templates/
-│   └── report.html.j2
 └── tests/
 ```
 
 ## Roadmap
 
-- [ ] HoYoLAB integration (resin thật, daily commission thật) — nếu làm sẽ tách biệt hoàn toàn khỏi pipeline mặc định
-- [ ] Tự động đánh giá lại meta sau mỗi bản patch mới
+Các ý tưởng dưới đây đang **tạm gác lại** cùng với việc dừng phát triển project. Có thể nối lại sau nếu có thời gian.
+
+- [ ] Multi-account
+- [ ] Discord/Telegram bot
+- [ ] Web Dashboard
+- [ ] Gợi ý banner nên roll (cần nguồn dữ liệu banner thời gian thực, chưa nghiên cứu)
 
 ## Disclaimer
 
-Project cá nhân/học tập, không liên kết HoYoverse. Chỉ đọc dữ liệu công khai (Enka Character Showcase người chơi tự bật, các trang guide/wiki công khai).
+Project cá nhân/học tập, không liên kết HoYoverse. Chỉ đọc dữ liệu công khai (Enka Character Showcase người chơi tự bật, trang guide công khai genshin-builds.github.io).
