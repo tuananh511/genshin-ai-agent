@@ -19,6 +19,16 @@ def _write_env(env: dict):
     ENV_PATH.write_text("\n".join(f"{k}={v}" for k, v in env.items()) + "\n", encoding="utf-8")
 
 
+def read_env() -> dict:
+    """Public wrapper — GUI dùng để đọc .env hiện tại (API key/UID) mà không qua input()."""
+    return _read_env()
+
+
+def write_env(env: dict) -> None:
+    """Public wrapper — GUI dùng để ghi .env (vd sau khi người dùng bấm Lưu ở tab Cài đặt)."""
+    _write_env(env)
+
+
 def ensure_config() -> None:
     """Chạy 1 lần đầu nếu .env chưa đủ thông tin — hỏi người dùng nhập API key + UID."""
     env = _read_env()

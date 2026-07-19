@@ -1,8 +1,6 @@
 # Genshin AI Account Manager
 
-> **🔧 Trạng thái: tạm dừng phát triển.** Tool chạy ổn định ở phiên bản hiện tại, không có lỗi biết trước, nhưng hiện không được phát triển thêm tính năng mới. Issue/PR vẫn được xem qua nếu có, nhưng phản hồi có thể chậm.
-
-AI Agent tự động phân tích account Genshin Impact và đề xuất việc nên làm hôm nay — chạy bằng `python main.py`, không phải chatbot hỏi-đáp.
+AI Agent phân tích account Genshin Impact và đối chiếu build với guide thật — có GUI desktop (PySide6) và CLI (`python main.py`), không phải chatbot hỏi-đáp.
 
 ## Pipeline
 
@@ -10,20 +8,31 @@ Data Collector (Enka API)
 → AssetManager (tra tên nhân vật/vũ khí/set: Enka loc.json → TextMap tiếng Việt/Anh)
 → Guide Collector (build guide thật từ genshin-builds.github.io, cache, cập nhật theo yêu cầu)
 → Optimizer (code tính stat + Gemini Flash đối chiếu guide, phát hiện cầm sai vũ khí/set)
-→ Planner (checklist farm gì hôm nay)
-→ Report Generator (report.html với Accordion + ảnh hover, report.md cho Github)
+→ Report Generator (report.html với Accordion + ảnh hover)
 
-Nguyên tắc: việc tính được bằng công thức (lịch server, parse dữ liệu, tra tên) dùng code thuần. AI chỉ dùng để đọc hiểu/diễn giải (đối chiếu build với guide, viết nhận xét).
+Nguyên tắc: việc tính được bằng công thức (parse dữ liệu, tra tên) dùng code thuần. AI chỉ dùng để đọc hiểu/diễn giải (đối chiếu build với guide, viết nhận xét).
+
+## 3 luồng phân tích độc lập
+
+`genshin_agent/services.py` tách 3 luồng phân tích thành 3 hàm độc lập, không phụ thuộc lẫn nhau, có thể chạy riêng lẻ (GUI có nút bấm riêng cho từng luồng):
+
+- `analyze_uid(uid)` — phân tích account theo UID (Enka + Optimizer, lưu DB)
+- `analyze_abyss()` — coach Spiral Abyss mùa hiện tại
+- `analyze_theater()` — coach Imaginarium Theater mùa hiện tại
+
+Report (`report.html`) có thể xuất bất cứ lúc nào từ những luồng đã chạy trong phiên làm việc — không bắt buộc phải chạy đủ cả 3.
 
 ## Tính năng
 
 - Lấy character/weapon/artifact/talent/constellation/level thật từ Enka Network (qua UID)
 - Tra tên nhân vật/vũ khí/Thánh Di Vật sang tiếng Việt qua `AssetManager` (Enka data + TextMap chính thức từ game)
 - Crawl build guide thật từ genshin-builds.github.io cho từng nhân vật trong account — vũ khí/set/chỉ số/kỹ năng xếp theo độ ưu tiên
-- Phát hiện khi đang dùng vũ khí/set KHÁC với đề xuất guide, gợi ý nên farm gì thay thế
+- Phát hiện khi đang dùng vũ khí/set KHÁC với đề xuất guide
 - Report dạng Accordion (1 nhân vật/mục), kèm ảnh hover khi rê chuột vào tên vũ khí/Thánh Di Vật, có link tới guide gốc
-- Checklist farm hôm nay (Required) + nhắc nhở phụ (Optional: HoYoLAB check-in, event, transformer, teapot — đều có link mở tab mới)
-- Xuất `report.html` (dark theme, màu theo hệ nguyên tố) và `report.md` (đọc trên Github)
+- Coach Spiral Abyss + Imaginarium Theater mùa hiện tại (cảnh báo quái nên dùng/tránh nguyên tố nào)
+- Xuất `report.html` (dark theme, màu theo hệ nguyên tố)
+
+> Đã bỏ: checklist farm hôm nay (Required/Optional) và mục Gift Code — không còn nằm trong scope của tool này nữa.
 
 ## Yêu cầu
 
@@ -33,50 +42,62 @@ Nguyên tắc: việc tính được bằng công thức (lịch server, parse d
 
 ## Cài đặt & chạy
 
+### GUI (khuyến nghị)
+
 ```
 git clone <repo-url>
 cd genshin-ai-agent
+uv run gui_app.py
+```
+
+Lần đầu mở app, vào tab **Cài đặt** để nhập API key + UID (lưu vào `.env`, chỉ hỏi 1 lần). Sau đó dùng 3 tab **Account**, **Spiral Abyss**, **Imaginarium Theater** để chạy từng phân tích riêng — mỗi tab có nút bấm và log riêng, không phụ thuộc nhau. Tab **Report** dùng để xuất/mở `report.html` bất cứ lúc nào từ các phân tích đã chạy.
+
+### CLI
+
+```
 uv run main.py
 ```
 
-Lần đầu chạy sẽ hỏi API key + UID (hoặc N để dùng UID demo). Mỗi lần chạy sẽ hỏi **"Cập nhật guide build mới nhất?"** — chọn N để dùng cache cũ (nhanh, không gọi mạng), chọn Y khi muốn crawl lại (ví dụ sau khi game ra bản cập nhật mới).
+Lần đầu chạy sẽ hỏi API key + UID. Mỗi luồng (guide update / Spiral Abyss / Imaginarium Theater) đều hỏi Y/N riêng — chọn N để bỏ qua luồng đó, không ảnh hưởng các luồng còn lại.
 
 ## Giới hạn cần biết
 
-- **LLM**: dùng Gemini Flash qua endpoint tương thích OpenAI của Google AI Studio. Nếu model lỗi/quá tải liên tục, tool sẽ hỏi bạn nhập tên model khác (xem danh sách tại [ai.google.dev/gemini-api/docs/models](https://ai.google.dev/gemini-api/docs/models)) và tự lưu lại cho lần sau.
+- **LLM**: dùng Gemini Flash qua endpoint tương thích OpenAI của Google AI Studio. Nếu model lỗi/quá tải liên tục ở CLI, tool sẽ hỏi bạn nhập tên model khác (xem danh sách tại [ai.google.dev/gemini-api/docs/models](https://ai.google.dev/gemini-api/docs/models)) và tự lưu lại cho lần sau. Ở GUI (không có terminal tương tác), bước hỏi đổi model này tự động bỏ qua và trả lỗi thẳng ra log.
 - **Tra tên item**: dùng dữ liệu Enka + TextMap chính thức từ game (qua `AssetManager`). Một số ít vũ khí/set (khoảng 10 trong toàn bộ game, đã xác minh kỹ) có hash không khớp với bất kỳ nguồn TextMap nào tìm được — hiển thị `(chưa rõ tên #hash)`, không suy đoán. Đây là giới hạn dữ liệu cộng đồng đã biết, không phải lỗi.
 - **Guide build**: crawl từ genshin-builds.github.io — chỉ hoạt động với nhân vật có trang guide đầy đủ trên đó.
+- **Imaginarium Theater**: nếu mùa hiện tại chưa có dữ liệu Battles trên nguồn, `analyze_theater()` raise `TheaterDataError` — không fallback về mùa cũ (tránh coach sai mùa).
 - **Wish Advisor** (`genshin_agent/wish_advisor.py`): đã viết nhưng **chưa nối vào pipeline chính** — tư vấn chiến lược roll banner cần model mạnh hơn free tier hiện tại để đủ tin cậy. Giữ lại để dễ nối lại sau.
 
 ## Cấu trúc project
 
 ```
 genshin-ai-agent/
-├── main.py
+├── main.py                  # CLI entry point
+├── gui_app.py                # GUI entry point (PySide6)
 ├── config.yaml
 ├── genshin_agent/
 │   ├── config.py            # đọc .env + config.yaml
-│   ├── llm_client.py        # get_llm() + safe_llm_call() — tự retry, tự hỏi đổi model khi lỗi
-│   ├── setup_wizard.py      # hỏi API key/UID lần đầu chạy
+│   ├── llm_client.py        # get_llm() + safe_llm_call() — tự retry, tự hỏi đổi model khi lỗi (CLI)
+│   ├── setup_wizard.py      # hỏi API key/UID lần đầu chạy (CLI)
+│   ├── services.py          # analyze_uid() / analyze_abyss() / analyze_theater() — 3 luồng độc lập
 │   ├── data_collector.py    # fetch + parse Enka API
 │   ├── database.py          # SQLite save/load
 │   ├── asset_manager.py     # tra tên nhân vật/vũ khí/set (Enka data + TextMap VI/EN)
 │   ├── guide_collector.py   # crawl build guide từ genshin-builds.github.io + cache
 │   ├── optimizer.py         # tính stat (code) + đối chiếu guide, phát hiện sai build (AI)
-│   ├── planner.py           # checklist farm hôm nay
+│   ├── abyss_pipeline.py / abyss_planner.py       # Spiral Abyss
+│   ├── theater_pipeline.py / theater_planner.py   # Imaginarium Theater
 │   ├── wish_advisor.py      # (chưa nối vào main.py — xem Giới hạn)
-│   └── report_generator.py  # xuất report.html/report.md
+│   └── report_generator.py  # xuất report.html
+├── gui/                      # widget/thread cho GUI
 ├── templates/
 └── tests/
 ```
 
 ## Roadmap
 
-Các ý tưởng dưới đây đang **tạm gác lại** cùng với việc dừng phát triển project. Có thể nối lại sau nếu có thời gian.
-
 - [ ] Multi-account
 - [ ] Discord/Telegram bot
-- [ ] Web Dashboard
 - [ ] Gợi ý banner nên roll (cần nguồn dữ liệu banner thời gian thực, chưa nghiên cứu)
 
 ## Disclaimer

@@ -11,13 +11,13 @@
   :root {
     --bg: #0f0f1a; --text: #e0e0e0; --gold: #c8a96e; --blue: #7eb8d4;
     --panel-bg: #1a1a2e; --border-muted: #2a2a4a; --muted: #888;
-    --todo-bg: #1e1e3a; --th-bg: #23234a; --tr-hover: #23233f;
+    --th-bg: #23234a; --tr-hover: #23233f;
     --green: #a4cf3c; --red: #ef7530;
   }
   [data-theme="light"] {
     --bg: #f4f4fa; --text: #23232f; --gold: #93672f; --blue: #1f6f96;
     --panel-bg: #ffffff; --border-muted: #e0e0ec; --muted: #6a6a78;
-    --todo-bg: #eef0fb; --th-bg: #e8e9f7; --tr-hover: #eef0fb;
+    --th-bg: #e8e9f7; --tr-hover: #eef0fb;
     --green: #4a8f16; --red: #c14f10;
     --bg-overlay: rgba(244, 244, 250, 0.82);
   }
@@ -114,31 +114,6 @@
     line-height: 1;
   }
 
-  /* ── Abyss section ── */
-  .abyss-floors { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; margin: 16px 0; }
-  .abyss-floor { background: var(--panel-bg); border-radius: 10px; padding: 14px 16px; border-left: 4px solid #b380e0; }
-  .abyss-floor h4 { color: var(--gold); margin: 0 0 6px 0; font-size: 1em; }
-  .abyss-floor .ley { color: var(--green); font-size: 0.85em; margin-bottom: 8px; font-style: italic; }
-  .abyss-chamber { margin: 10px 0; font-size: 0.88em; padding-top: 8px; border-top: 1px solid var(--border-muted); }
-  .abyss-chamber:first-of-type { border-top: none; padding-top: 0; }
-  .abyss-chamber .ch-label { color: var(--blue); font-weight: bold; }
-  .abyss-note { color: var(--muted); font-size: 0.85em; font-style: italic; margin: 4px 0 8px 0; }
-  .half-block { margin: 6px 0; }
-  .half-block .half-label { color: var(--muted); font-size: 0.85em; }
-  .abyss-enemy { margin: 3px 0 3px 10px; line-height: 1.5; }
-  .abyss-enemy .enemy-name { color: var(--text); }
-  .abyss-enemy .enemy-note { color: var(--muted); font-size: 0.85em; margin-left: 4px; }
-  .badge { display: inline-block; font-size: 0.78em; border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
-  .badge-use { background: color-mix(in srgb, var(--green) 20%, transparent); color: var(--green); }
-  .badge-avoid { background: color-mix(in srgb, var(--red) 20%, transparent); color: var(--red); }
-  .badge-unknown { background: var(--border-muted); color: var(--muted); font-style: italic; }
-  .badge-ok { background: var(--th-bg); color: var(--muted); }
-
-/* ── Tabs (CSS-only) — giờ chỉ còn 1 panel (Coach Sự Kiện), luôn hiển thị ── */
-  .tabs-group { margin-top: 30px; }
-  .tab-panel { padding-top: 16px; }
-  .tab-panel h2:first-child { margin-top: 0; }
-
   /* ── Theme toggle bubble ── */
   #theme-toggle {
     position: fixed; bottom: 24px; right: 24px; z-index: 100;
@@ -161,13 +136,13 @@
   #support-popup.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
   #support-popup .support-emoji { font-size: 1.6em; }
   #support-popup .support-text { font-size: 0.85em; line-height: 1.3; }
-  #support-popup:hover { border-color: var(--blue); 
+  #support-popup:hover { border-color: var(--blue);
   --bg-overlay: rgba(15, 15, 26, 0.82);}
 </style>
 </head>
 <body{% if background_image_url %} class="has-bg-image" style="--report-bg-image: url('{{ background_image_url }}');"{% endif %}>
 
-<h1>⚔️ Genshin AI Agent</h1>
+<h1>⚔️ Genshin AI Agent — Phân tích Account</h1>
 <div class="meta">
   📅 {{ report_date }} &nbsp;|&nbsp;
   👤 {{ nickname }} &nbsp;|&nbsp;
@@ -233,104 +208,6 @@
 
 <h2>🔍 Phân tích từ AI</h2>
 <div class="card">{{ llm_advice_html | safe }}</div>
-
-<div class="tabs-group">
-  <div class="tab-panel" id="panel-coach">
-    <h2>🌀 Coach Sự Kiện</h2>
-    {% if abyss %}
-    <h2>🌀 Spiral Abyss — {{ abyss.period_label }}</h2>
-    <div class="abyss-floors">
-      {% for floor in abyss.floors %}
-      <div class="abyss-floor">
-        <h4>Floor {{ floor.floor_number }}</h4>
-        {% if floor.ley_line_disorder %}
-        <div class="ley">
-          {% for lld in floor.ley_line_disorder %}✦ {{ lld }}<br>{% endfor %}
-        </div>
-        {% endif %}
-        {% for ch in floor.chambers %}
-        <div class="abyss-chamber">
-          <span class="ch-label">Chamber {{ ch.chamber_index }}</span>
-          <span style="color:#888;"> Lv.{{ ch.level }} — {{ ch.target }}</span>
-          {% if ch.note_vi %}
-          <div class="abyss-note">📝 {{ ch.note_vi | replace("\n", "<br>") }}</div>
-          {% endif %}
-          {% for hw in ch.halves %}
-          <div class="half-block">
-            <span class="half-label">Nửa {{ 'đầu' if hw.half == 1 else 'sau' }}:</span>
-            {% for ew in hw.enemies %}
-            <div class="abyss-enemy">
-              <span class="enemy-name">{{ ew.name }} ×{{ ew.count }}</span>
-              {% if ew.unknown %}
-              <span class="badge badge-unknown">chưa có dữ liệu về quái này</span>
-              {% else %}
-                {% if ew.use %}<span class="badge badge-use">dùng {{ ew.use | join('/') }}</span>{% endif %}
-                {% if ew.avoid %}<span class="badge badge-avoid">tránh {{ ew.avoid | join('/') }}</span>{% endif %}
-                {% if not ew.use and not ew.avoid and not ew.note %}<span class="badge badge-ok">không cảnh báo đặc biệt</span>{% endif %}
-                {% if ew.note %}<span class="enemy-note">{{ ew.note }}</span>{% endif %}
-              {% endif %}
-            </div>
-            {% endfor %}
-          </div>
-          {% endfor %}
-        </div>
-        {% endfor %}
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if theater %}
-    <h2>🎭 Imaginarium Theater — {{ theater.period_label }}</h2>
-    {% for act in theater.acts %}
-    <div class="abyss-floor">
-      <h4>{{ act.act_name }}</h4>
-      {% if act.description %}<div class="ley">✦ {{ act.description }}</div>{% endif %}
-      {% for battle in act.battles %}
-      <div class="abyss-chamber">
-        {% if battle.battle_name %}<span class="ch-label">{{ battle.battle_name }}</span>{% endif %}
-        {% if battle.stage_effects %}
-        <div class="abyss-note">📝 {{ battle.stage_effects | join(' · ') }}</div>
-        {% endif %}
-        {% for v in battle.variants %}
-        <div class="half-block">
-          <span class="half-label">
-            {% if battle.variants | length > 1 %}Biến thể {{ v.variant_index }} (1 trong các khả năng có thể rơi vào):{% endif %}
-            {% if v.target %}{{ v.target }}{% endif %}
-            {% if v.level_raw %} — Lv.{{ v.level_raw | replace("<br>", " / ") }}{% endif %}
-            {% if v.advantage %} — Lợi thế hệ: {{ v.advantage }}{% endif %}
-          </span>
-          {% for wave in v.waves %}
-          {% for ew in wave %}
-          <div class="abyss-enemy">
-            <span class="enemy-name">{{ ew.name }} ×{{ 'liên tục' if ew.count == -1 else ew.count }}</span>
-            {% if ew.is_bounty_target %}<span class="badge badge-avoid">⚠️ mục tiêu bounty chính</span>{% endif %}
-            {% if ew.aura %}<span class="badge badge-use">aura {{ ew.aura }}</span>{% endif %}
-            {% if ew.unknown %}
-            <span class="badge badge-unknown">chưa có dữ liệu về quái này</span>
-            {% else %}
-              {% if ew.use %}<span class="badge badge-use">dùng {{ ew.use | join('/') }}</span>{% endif %}
-              {% if ew.avoid %}<span class="badge badge-avoid">tránh {{ ew.avoid | join('/') }}</span>{% endif %}
-              {% if not ew.use and not ew.avoid and not ew.note %}<span class="badge badge-ok">không cảnh báo đặc biệt</span>{% endif %}
-              {% if ew.note %}<span class="enemy-note">{{ ew.note }}</span>{% endif %}
-            {% endif %}
-          </div>
-          {% endfor %}
-          {% endfor %}
-        </div>
-        {% endfor %}
-      </div>
-      {% endfor %}
-    </div>
-    {% endfor %}
-    {% endif %}
-
-    {% if not abyss and not theater %}
-    <p style="color: var(--muted);">Chưa có dữ liệu Spiral Abyss / Imaginarium Theater — chạy phân tích Abyss/Theater trong app để xem ở đây.</p>
-    {% endif %}
-  </div>
-</div>
-
 
 <footer style="color: var(--muted); text-align:center; margin-top:60px; font-size:0.85em;">Generated by Genshin AI Agent</footer>
 

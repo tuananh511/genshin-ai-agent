@@ -4,17 +4,16 @@ from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 import markdown
 from genshin_agent.optimizer import AccountAnalysis
-from genshin_agent.planner import DailyPlan
 from genshin_agent.asset_manager import asset_manager
 from genshin_agent import background_collector
 
-def generate_reports(nickname, ar, analysis, plan,
-                     abyss_data=None, theater_data=None, promo_codes=None) -> tuple[Path, Path]:
+def generate_reports(nickname, ar, analysis,
+                     abyss_data=None, theater_data=None) -> tuple[Path, Path]:
     """Xuất report.html. Trả tuple (html_path, html_path) để main.py không cần sửa unpack."""
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)))
     context = _build_context(
-        nickname=nickname, ar=ar, analysis=analysis, plan=plan,
-        abyss_data=abyss_data, theater_data=theater_data, promo_codes=promo_codes,
+        nickname=nickname, ar=ar, analysis=analysis,
+        abyss_data=abyss_data, theater_data=theater_data,
     )
     context["background_image_url"] = background_collector.get_random_background_url()
 
@@ -280,25 +279,8 @@ def _build_abyss_context(abyss_data) -> dict | None:
     }
 
 
-def _build_promo_codes_context(promo_codes) -> list[dict] | None:
-    """promo_codes: None hoặc list[PromoCode] từ promo_code_pipeline.get_active_promo_codes()."""
-    if promo_codes is None:
-        return None
-    return [
-        {
-            "code":           pc.code,
-            "server_label":   pc.server_label,
-            "rewards":        [{"name": n, "count": c} for n, c in pc.rewards],
-            "discovery_date": pc.discovery_date,
-            "expiry_label":   pc.expiry_label,
-            "notes":          pc.notes,
-        }
-        for pc in promo_codes
-    ]
-
-
-def _build_context(nickname, ar, analysis: AccountAnalysis, plan: DailyPlan,
-                   abyss_data=None, theater_data=None, promo_codes=None) -> dict:
+def _build_context(nickname, ar, analysis: AccountAnalysis,
+                   abyss_data=None, theater_data=None) -> dict:
     all_builds = _get_crimsonwitch_builds_safe()
     score_rows = _build_score_rows(analysis.scores, all_builds)
     accordions = _build_guide_accordions(analysis.scores, analysis.guides)
@@ -314,13 +296,8 @@ def _build_context(nickname, ar, analysis: AccountAnalysis, plan: DailyPlan,
         "llm_advice":       analysis.llm_advice,
         "llm_advice_html":  llm_advice_html,
         "guide_accordions": accordions,
-        "day_of_week":      plan.day_of_week,
-        "required_todos":   plan.required_todos,
-        "optional_todos":   plan.optional_todos,
         "abyss":            _build_abyss_context(abyss_data),
         "theater":          _build_theater_context(theater_data),
-        "promo_codes":      _build_promo_codes_context(promo_codes),
-        
     }
 
 def _build_guide_url(name_en: str) -> str:

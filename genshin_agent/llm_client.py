@@ -1,3 +1,4 @@
+import sys
 import time
 import yaml
 from pathlib import Path
@@ -47,6 +48,12 @@ def _looks_broken(text: str) -> bool:
 
 
 def _ask_user_for_alternative_model(first_prompt: str) -> str:
+    if not sys.stdin.isatty():
+        # Đang chạy trong GUI hoặc môi trường không có stdin tương tác
+        # (vd PySide6 app) — không thể gọi input(), bỏ qua bước hỏi đổi model.
+        print("  [warn] Model lỗi liên tục và không ở terminal tương tác — bỏ qua, trả lỗi.")
+        return ""
+
     print()
     print("=" * 60)
     print("Model hiện tại đang lỗi liên tục (server quá tải hoặc tên model không đúng).")

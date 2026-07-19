@@ -19,20 +19,6 @@
 
 ---
 
-## 🎯 Domain nên farm hôm nay ({{ day_of_week }})
-
-{% for todo in required_todos -%}
-- **{{ todo.label }}** — {{ todo.reason }}
-{% endfor %}
-
-## 📝 Nhắc nhở thêm (tuỳ chọn)
-
-{% for todo in optional_todos -%}
-- {{ todo.label }}{% if todo.url %} ([Mở link]({{ todo.url }})){% endif %} — {{ todo.reason }}
-{% endfor %}
-
----
-
 ## 📖 Chi tiết Build Guide
 
 {% for acc in guide_accordions %}
