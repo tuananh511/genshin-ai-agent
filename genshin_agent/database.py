@@ -1,9 +1,9 @@
 import sqlite3
 import json
-from pathlib import Path
+from genshin_agent.paths import app_base_dir
 from genshin_agent.data_collector import AccountSnapshot
 
-DB_PATH = Path(__file__).resolve().parent.parent / "genshin_agent.db"
+DB_PATH = app_base_dir() / "genshin_agent.db"
 
 
 def get_connection() -> sqlite3.Connection:

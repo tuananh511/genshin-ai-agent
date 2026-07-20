@@ -1,0 +1,203 @@
+/*
+Theme dark-gold — đồng bộ với bảng màu report.html
+(--bg #0f0f1a, --panel-bg #1a1a2e, --gold #c8a96e, --blue #7eb8d4,
+ --border-muted #2a2a4a, --muted #888, --green #a4cf3c, --red #ef7530)
+*/
+
+* {
+    font-family: "Segoe UI", "Montserrat", sans-serif;
+}
+
+QMainWindow, QWidget {
+    background-color: #0f0f1a;
+    color: #e0e0e0;
+}
+
+/* ── Sidebar ─────────────────────────────────────────── */
+#sidebar {
+    background-color: #14141f;
+    border-right: 1px solid #2a2a4a;
+}
+
+#sidebar QListWidget {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 10px 0;
+    font-size: 13px;
+}
+
+#sidebar QListWidget::item {
+    padding: 12px 20px;
+    border-left: 3px solid transparent;
+    color: #b7b7c4;
+}
+
+#sidebar QListWidget::item:hover {
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+}
+
+#sidebar QListWidget::item:selected {
+    background-color: #1a1a2e;
+    border-left: 3px solid #c8a96e;
+    color: #c8a96e;
+    font-weight: 600;
+}
+
+#appTitle {
+    color: #c8a96e;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 20px 20px 4px 20px;
+}
+
+#appSubtitle {
+    color: #666;
+    font-size: 11px;
+    padding: 0 20px 16px 20px;
+    border-bottom: 1px solid #2a2a4a;
+}
+
+/* ── Page header ─────────────────────────────────────── */
+#pageHeader {
+    color: #e0e0e0;
+    font-size: 19px;
+    font-weight: 700;
+    padding-bottom: 2px;
+}
+
+#pageSubtitle {
+    color: #888;
+    font-size: 12px;
+    padding-bottom: 6px;
+}
+
+/* ── Cards / group boxes ─────────────────────────────── */
+QGroupBox {
+    background-color: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    margin-top: 14px;
+    padding: 14px 12px 12px 12px;
+    font-weight: 600;
+    color: #7eb8d4;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 6px;
+    color: #7eb8d4;
+}
+
+/* ── Inputs ──────────────────────────────────────────── */
+QLineEdit, QPlainTextEdit {
+    background-color: #16162a;
+    border: 1px solid #2a2a4a;
+    border-radius: 6px;
+    padding: 7px 10px;
+    color: #e0e0e0;
+    selection-background-color: #c8a96e;
+    selection-color: #16162a;
+}
+
+QLineEdit:focus, QPlainTextEdit:focus {
+    border: 1px solid #c8a96e;
+}
+
+QPlainTextEdit {
+    font-family: "Cascadia Code", "Consolas", monospace;
+    font-size: 12px;
+}
+
+QLabel {
+    color: #cfcfd8;
+}
+
+QCheckBox {
+    color: #cfcfd8;
+    spacing: 8px;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #2a2a4a;
+    border-radius: 3px;
+    background: #16162a;
+}
+
+QCheckBox::indicator:checked {
+    background: #c8a96e;
+    border: 1px solid #c8a96e;
+}
+
+/* ── Buttons ─────────────────────────────────────────── */
+QPushButton {
+    background-color: #c8a96e;
+    color: #16162a;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 18px;
+    font-weight: 600;
+}
+
+QPushButton:hover {
+    background-color: #d9bd85;
+}
+
+QPushButton:pressed {
+    background-color: #b8996a;
+}
+
+QPushButton:disabled {
+    background-color: #3a3a4a;
+    color: #777;
+}
+
+QPushButton#secondaryButton {
+    background-color: #23234a;
+    color: #7eb8d4;
+    border: 1px solid #2a2a4a;
+}
+
+QPushButton#secondaryButton:hover {
+    background-color: #2a2a52;
+}
+
+/* ── Scrollbars ──────────────────────────────────────── */
+QScrollBar:vertical {
+    background: #14141f;
+    width: 10px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #2a2a4a;
+    border-radius: 5px;
+    min-height: 24px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #3a3a5e;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0;
+}
+
+/* ── Status pill labels (dùng trong tab Report) ───────── */
+QLabel#statusOk {
+    color: #a4cf3c;
+    font-weight: 600;
+}
+
+QLabel#statusPending {
+    color: #888;
+}
+
+/* ── MessageBox ──────────────────────────────────────── */
+QMessageBox {
+    background-color: #1a1a2e;
+}

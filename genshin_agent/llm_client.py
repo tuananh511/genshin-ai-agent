@@ -1,11 +1,11 @@
 import sys
 import time
 import yaml
-from pathlib import Path
 from langchain_openai import ChatOpenAI
+from genshin_agent.paths import app_base_dir
 from genshin_agent.config import load_config
 
-_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.yaml"
+_CONFIG_PATH = app_base_dir() / "config.yaml"
 MAX_RESPONSE_CHARS = 3000
 VIETNAMESE_CHARS = "ăâđêôơưàằầậảẩẫáắấậạéèẻẽẹêềếểễệíìỉĩịóòỏõọôồốổỗộơờớởỡợúùủũụưừứửữựýỳỷỹỵ"
 

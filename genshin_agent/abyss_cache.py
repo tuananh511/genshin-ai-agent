@@ -10,9 +10,9 @@ là tín hiệu duy nhất cần thiết để invalidate.
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from genshin_agent.paths import app_base_dir
 
-CACHE_FILE = Path("abyss_cache.json")
+CACHE_FILE = app_base_dir() / "abyss_cache.json"
 
 
 def _load() -> dict:

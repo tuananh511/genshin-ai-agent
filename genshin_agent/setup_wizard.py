@@ -1,6 +1,6 @@
-from pathlib import Path
+from genshin_agent.paths import app_base_dir
 
-ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+ENV_PATH = app_base_dir() / ".env"
 
 
 

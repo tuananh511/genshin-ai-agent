@@ -44,6 +44,9 @@ Report (`report.html`) có thể xuất bất cứ lúc nào từ những luồn
 
 ### GUI (khuyến nghị)
 
+**Cách 1 — double-click, không cần gõ lệnh:** chạy `run_gui.bat` (tự cài dependency qua `uv sync` lần đầu nếu cần, rồi mở app).
+
+**Cách 2 — dòng lệnh:**
 ```
 git clone <repo-url>
 cd genshin-ai-agent
@@ -51,6 +54,10 @@ uv run gui_app.py
 ```
 
 Lần đầu mở app, vào tab **Cài đặt** để nhập API key + UID (lưu vào `.env`, chỉ hỏi 1 lần). Sau đó dùng 3 tab **Account**, **Spiral Abyss**, **Imaginarium Theater** để chạy từng phân tích riêng — mỗi tab có nút bấm và log riêng, không phụ thuộc nhau. Tab **Report** dùng để xuất/mở `report.html` bất cứ lúc nào từ các phân tích đã chạy.
+
+### Đóng gói thành file .exe standalone (tuỳ chọn)
+
+Chạy `build_exe.bat` **trên máy Windows** (không build được từ Linux/sandbox — PyInstaller đóng gói cho đúng hệ điều hành đang chạy nó). Kết quả nằm ở `dist\GenshinAIAccountManager.exe` kèm `dist\config.yaml` — giữ 2 file này cùng thư mục, đừng tách riêng. Lần đầu chạy `.exe` sẽ tự tạo `.env` / `genshin_agent.db` / các file cache ngay cạnh nó.
 
 ### CLI
 
@@ -74,8 +81,11 @@ Lần đầu chạy sẽ hỏi API key + UID. Mỗi luồng (guide update / Spir
 genshin-ai-agent/
 ├── main.py                  # CLI entry point
 ├── gui_app.py                # GUI entry point (PySide6)
+├── run_gui.bat                # double-click chạy GUI, không cần gõ lệnh
+├── build_exe.bat              # đóng gói .exe standalone (chạy trên Windows)
 ├── config.yaml
 ├── genshin_agent/
+│   ├── paths.py             # chuẩn hoá đường dẫn (chạy từ source vs .exe đóng gói)
 │   ├── config.py            # đọc .env + config.yaml
 │   ├── llm_client.py        # get_llm() + safe_llm_call() — tự retry, tự hỏi đổi model khi lỗi (CLI)
 │   ├── setup_wizard.py      # hỏi API key/UID lần đầu chạy (CLI)
@@ -89,7 +99,10 @@ genshin-ai-agent/
 │   ├── theater_pipeline.py / theater_planner.py   # Imaginarium Theater
 │   ├── wish_advisor.py      # (chưa nối vào main.py — xem Giới hạn)
 │   └── report_generator.py  # xuất report.html
-├── gui/                      # widget/thread cho GUI
+├── gui/
+│   ├── main_window.py        # sidebar (QListWidget) + QStackedWidget — Account/Abyss/Theater/Report/Cài đặt
+│   ├── style.qss               # theme dark-gold, đồng bộ màu report.html
+│   └── workers.py              # QThread wrapper cho services.py (không đơ UI)
 ├── templates/
 └── tests/
 ```

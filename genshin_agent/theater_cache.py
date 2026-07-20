@@ -9,9 +9,9 @@ sẽ làm event chạy sau xoá mất cache của event chạy trước.
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from genshin_agent.paths import app_base_dir
 
-CACHE_FILE = Path("theater_cache.json")
+CACHE_FILE = app_base_dir() / "theater_cache.json"
 
 
 def _load() -> dict:

@@ -271,9 +271,9 @@ Trả lời chỉ bằng danh sách gạch đầu dòng theo đúng quy tắc tr
     guide_sources = [
         {
             "name": s.name,
-            "url": f"https://genshin-impact-helper-team.github.io/genshin-builds/en/{guides[s.avatar_id]['slug']}",
+            "url": f"https://genshin-impact-helper-team.github.io/genshin-builds/en/{(guides.get(s.avatar_id) or {})['slug']}",
         }
-        for s in scores if guides.get(s.avatar_id, {}).get("slug")
+        for s in scores if (guides.get(s.avatar_id) or {}).get("slug")
     ]
 
     return AccountAnalysis(scores=scores, llm_advice=advice, guide_sources=guide_sources, guides=guides)

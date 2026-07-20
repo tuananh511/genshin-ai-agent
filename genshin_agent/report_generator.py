@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 from datetime import datetime
+from genshin_agent.paths import app_base_dir, bundled_resource_dir
 from jinja2 import Environment, FileSystemLoader
 import markdown
 from genshin_agent.optimizer import AccountAnalysis
@@ -24,8 +25,8 @@ def generate_reports(nickname, ar, analysis,
     return html_path, html_path
 
 _PERIOD_DATE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})")
-TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
-OUTPUT_DIR = Path(__file__).resolve().parent.parent
+TEMPLATES_DIR = bundled_resource_dir() / "templates"
+OUTPUT_DIR = app_base_dir()
 GUIDE_BASE_URL = "https://genshin-impact-helper-team.github.io/genshin-builds/en"
 
 STAT_COLUMNS = [
