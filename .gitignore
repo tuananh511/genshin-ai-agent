@@ -17,3 +17,7 @@ theater_cache.json
 # OS
 .DS_Store
 Thumbs.db
+# Script tham dò/debug t?m th?i - không commit
+tests/explore_*
+tests/probe_*
+tests/debug_*
